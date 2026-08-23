@@ -1,0 +1,22 @@
+[package]
+name = "criticality"
+version = "0.0.1-rc.1"
+description = "Bounded deterministic simulation primitives for state machines and effect-driven systems"
+edition = "2024"
+license = "Apache-2.0"
+repository = "https://github.com/zsumz/criticality"
+rust-version = "1.88"
+readme = "README.md"
+keywords = ["deterministic", "no-std", "simulation", "state-machine", "testing"]
+categories = ["development-tools::testing", "no-std"]
+
+[dependencies]
+
+[lints.rust]
+missing_debug_implementations = "warn"
+missing_docs = "warn"
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
