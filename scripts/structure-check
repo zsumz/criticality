@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Check repository boundaries that do not require compiling Rust.
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+status=0
+
+for removed in crates docs reference; do
+    if [[ -e "$repo_root/$removed" || -L "$repo_root/$removed" ]]; then
+        echo "error: single-crate repository may not contain $removed/" >&2
+        status=1
+    fi
+done
+
+while IFS= read -r markdown; do
+    if [[ "$markdown" != "README.md" ]]; then
+        echo "error: README.md is the only tracked Markdown document: $markdown" >&2
+        status=1
+    fi
+done < <(git -C "$repo_root" ls-files '*.md' | LC_ALL=C sort)
+
+while IFS= read -r source; do
+    lines="$(wc -l < "$source" | tr -d ' ')"
+    if ((lines > 300)); then
+        echo "error: Rust source exceeds 300 lines: ${source#"$repo_root"/} ($lines)" >&2
+        status=1
+    fi
+done < <(find "$repo_root/src" "$repo_root/tests" -type f -name '*.rs' -print | LC_ALL=C sort)
+
+if grep -R -F '#[cfg(test)]' "$repo_root/src" >/dev/null; then
+    echo "error: tests belong in sibling *_test.rs files or tests/" >&2
+    status=1
+fi
+
+for cargo_config in .cargo/config .cargo/config.toml; do
+    if [[ -e "$repo_root/$cargo_config" || -L "$repo_root/$cargo_config" ]]; then
+        echo "error: repository-local Cargo configuration is not permitted: $cargo_config" >&2
+        status=1
+    fi
+done
+
+if ((status != 0)); then
+    exit "$status"
+fi
+
+echo "repository structure check passed"
