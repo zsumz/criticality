@@ -1,0 +1,19 @@
+name: setup zrail
+description: Build and install the exact reviewed zrail source revision.
+runs:
+  using: composite
+  steps:
+    - name: Install zrail build toolchain
+      shell: bash
+      run: rustup toolchain install 1.96.1 --profile minimal
+    - name: Install reviewed zrail source
+      shell: bash
+      run: >-
+        cargo +1.96.1 install
+        --git https://github.com/zsumz/zrail.git
+        --rev 0392168aedc32f493a53e7d954684e201c882c3c
+        --locked
+        zrail
+    - name: Verify installed zrail version
+      shell: bash
+      run: test "$(zrail --version)" = "zrail 0.0.2"
