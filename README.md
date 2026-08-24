@@ -44,8 +44,9 @@ admission instead of an implicit property of a container.
 
 ### Timeline
 
-`Timeline` orders owned events by virtual moment, consumer-defined phase, and
-stable insertion identity. Scheduling and cancellation are bounded,
+`Timeline` orders owned events by virtual moment, finite consumer-defined phase,
+and stable insertion identity. Phases must be `Copy + Ord`; variable retained
+data belongs in the measured event. Scheduling and cancellation are bounded,
 timeline-scoped, and ownership-preserving.
 
 ### Plans and scripts

@@ -20,8 +20,17 @@ struct Entry<E> {
 }
 
 /// Bounded timeline ordered by moment, consumer phase, and insertion identity.
+///
+/// Phases are finite structural values. Variable retained data belongs in the
+/// measured event rather than an unmeasured ordering key.
+///
+/// ```compile_fail
+/// use criticality::timeline::Timeline;
+///
+/// let _: Option<Timeline<(), String>> = None;
+/// ```
 #[derive(Clone, Debug)]
-pub struct Timeline<E, P = ()> {
+pub struct Timeline<E, P: Copy + Ord = ()> {
     id: TimelineId,
     clock: VirtualClock,
     limits: TimelineLimits,
@@ -31,7 +40,7 @@ pub struct Timeline<E, P = ()> {
     events: BTreeMap<EventKey<P>, Entry<E>>,
 }
 
-impl<E: Retained, P: Ord> Timeline<E, P> {
+impl<E: Retained, P: Copy + Ord> Timeline<E, P> {
     /// Creates an empty timeline at [`Moment::ORIGIN`].
     #[must_use]
     pub fn new(id: TimelineId, limits: TimelineLimits) -> Self {
@@ -45,7 +54,7 @@ impl<E: Retained, P: Ord> Timeline<E, P> {
     }
 }
 
-impl<E, P: Ord> Timeline<E, P> {
+impl<E, P: Copy + Ord> Timeline<E, P> {
     /// Creates an origin timeline using an explicit event measurement function.
     #[must_use]
     pub fn with_measure(
@@ -125,7 +134,7 @@ impl<E, P: Ord> Timeline<E, P> {
     }
 }
 
-impl<E, P: Clone + Ord> Timeline<E, P> {
+impl<E, P: Copy + Ord> Timeline<E, P> {
     /// Removes and returns the earliest event, advancing time to its moment.
     pub fn pop_next(&mut self) -> Option<Delivery<E, P>> {
         let (_, first) = self.events.first_key_value()?;
@@ -140,7 +149,7 @@ impl<E, P: Clone + Ord> Timeline<E, P> {
     }
 }
 
-impl<E, P: Ord> Timeline<E, P> {
+impl<E, P: Copy + Ord> Timeline<E, P> {
     /// Cancels the exact pending event named by `token` and returns its value.
     ///
     /// Tokens from other timelines and tokens for events no longer pending do

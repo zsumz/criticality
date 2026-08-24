@@ -8,7 +8,7 @@ use crate::{
 use super::{Entry, Timeline};
 use crate::timeline::{EventId, EventToken, ScheduleError, ScheduleFailure};
 
-impl<E, P: Clone + Ord> Timeline<E, P> {
+impl<E, P: Copy + Ord> Timeline<E, P> {
     /// Schedules an event at an absolute moment and explicit phase.
     ///
     /// # Errors
@@ -64,7 +64,7 @@ impl<E, P: Clone + Ord> Timeline<E, P> {
                 ScheduleFailure::EventIdsExhausted,
             ));
         };
-        let token = EventToken::new(self.id, id, at, phase.clone());
+        let token = EventToken::new(self.id, id, at, phase);
         let entry = Entry {
             event,
             retained: measured,
