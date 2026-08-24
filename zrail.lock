@@ -2,7 +2,7 @@
 schema = 1
 semantics = 2
 producer = "0.0.2"
-contract_sha256 = "de1d4d9370fa88c66e1a5ff238da5bbbacd064366fa986b816141153df2a788f"
+contract_sha256 = "b5391692200f373d3625acdced942c519101663bd2ebd2a45c232ff0550f9001"
 ratchet = []
 
 [[package]]
@@ -25,7 +25,7 @@ sha256 = "278374ff43731777bc63b5d4945a6cafa620f8dc246761dff757d2a0905cf29d"
 [[gate]]
 name = "check"
 path = "zcheck.toml"
-sha256 = "6d9edc5fb5a3e4c026336a1fabf418133fb59ac4f3b1a4369578027a53bbf3b1"
+sha256 = "70a225bbac06e0870e29dd180fa77987faf0d30ba56668cd2636f024847d11fa"
 
 [[gate.input]]
 path = ".gitattributes"
@@ -69,7 +69,7 @@ sha256 = "07c347dc7273b4ae0aa3e8451b99059ea8f6ad839e62adc33a273f23d152fa61"
 
 [[gate.input]]
 path = "scripts/package-check"
-sha256 = "af5673d423f3c5a994211e9dcc45d1817d80cf63df62212941ed32281860f9fa"
+sha256 = "9c4699232aad66464ff6b17ffabebf8c4c2c393a4c55a8b6b36288a782e350e4"
 
 [[gate.input]]
 path = "scripts/structure-check"

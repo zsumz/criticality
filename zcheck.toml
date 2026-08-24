@@ -9,7 +9,7 @@ repository_state = "preserve"
 [tasks.structure]
 description = "Enforce the single-crate source and documentation shape."
 run = ["scripts/structure-check"]
-tools = ["bash", "find", "git", "grep", "sort", "tr", "wc"]
+tools = ["bash", "dirname", "find", "git", "grep", "sort", "tr", "wc"]
 inputs = ["scripts/structure-check", "Cargo.toml", "README.md", "criticality-logo.svg", "src/lib.rs"]
 
 [tasks.zrail]
@@ -84,7 +84,7 @@ needs = ["test"]
 [tasks.package]
 description = "Build and verify the exact publishable crate archive."
 run = ["scripts/package-check"]
-tools = ["bash", "cargo", "diff", "mktemp", "rm", "sort"]
+tools = ["bash", "cargo", "diff", "dirname", "mktemp", "rm", "sort"]
 resources = ["cargo-target"]
 inputs = ["scripts/package-check", "package-contents.txt", "Cargo.toml", "Cargo.lock", "README.md"]
 
