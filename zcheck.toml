@@ -1,0 +1,83 @@
+schema = 1
+default = "check"
+
+[execution]
+jobs = 4
+default_timeout = "20m"
+repository_state = "preserve"
+
+[tasks.structure]
+description = "Enforce the single-crate source and documentation shape."
+run = ["scripts/structure-check"]
+tools = ["bash", "find", "git", "grep", "sort", "tr", "wc"]
+inputs = ["scripts/structure-check", "Cargo.toml", "README.md", "src/lib.rs"]
+
+[tasks.zrail]
+description = "Enforce the reviewed architecture policy."
+run = ["zrail", "check"]
+tools = ["zrail"]
+inputs = ["zrail.toml", "zrail.lock"]
+
+[tasks.git-diff]
+description = "Reject whitespace errors in unstaged changes."
+run = ["git", "diff", "--check"]
+tools = ["git"]
+
+[tasks.git-diff-cached]
+description = "Reject whitespace errors in staged changes."
+run = ["git", "diff", "--cached", "--check"]
+tools = ["git"]
+
+[tasks.architecture]
+description = "Validate source shape, architecture policy, and diff hygiene."
+needs = ["structure", "zrail", "git-diff", "git-diff-cached"]
+
+[tasks.format]
+description = "Validate Rust formatting."
+run = ["cargo", "fmt", "--all", "--", "--check"]
+tools = ["cargo"]
+resources = ["cargo-target"]
+
+[tasks.no-std]
+description = "Check the dependency-free no-std library."
+run = ["cargo", "check", "--lib", "--locked", "--offline"]
+tools = ["cargo"]
+resources = ["cargo-target"]
+
+[tasks.clippy]
+description = "Run Clippy across every target with warnings denied."
+run = ["cargo", "clippy", "--all-targets", "--all-features", "--locked", "--offline", "--", "-D", "warnings"]
+tools = ["cargo"]
+resources = ["cargo-target"]
+
+[tasks.docs]
+description = "Build library documentation with warnings denied."
+run = ["cargo", "doc", "--all-features", "--no-deps", "--locked", "--offline"]
+env = { RUSTDOCFLAGS = "-D warnings" }
+tools = ["cargo"]
+resources = ["cargo-target"]
+
+[tasks.rust-lint]
+description = "Validate the no-std build, formatting, lints, and documentation."
+needs = ["format", "no-std", "clippy", "docs"]
+
+[tasks.test]
+description = "Run the complete test suite."
+run = ["cargo", "test", "--all-features", "--locked", "--offline"]
+tools = ["cargo"]
+resources = ["cargo-target"]
+
+[tasks.rust-test]
+description = "Validate deterministic library behavior."
+needs = ["test"]
+
+[tasks.package]
+description = "Build and verify the publishable crate archive."
+run = ["cargo", "package", "--locked", "--offline", "--allow-dirty"]
+tools = ["cargo"]
+resources = ["cargo-target"]
+inputs = ["Cargo.toml", "Cargo.lock", "README.md"]
+
+[tasks.check]
+description = "Run complete local criticality qualification."
+needs = ["architecture", "rust-lint", "rust-test", "package"]

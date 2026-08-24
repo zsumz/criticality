@@ -12,7 +12,7 @@ symlinks = "inside"
 [[gate]]
 name = "check"
 kind = "local"
-path = "scripts/check"
+path = "zcheck.toml"
 inputs = [
   "scripts/structure-check",
   "rust-toolchain.toml",
@@ -25,7 +25,7 @@ inputs = [
   "README.md",
   "src/lib.rs",
 ]
-reason = "The repository's canonical local qualification entrypoint."
+reason = "The repository's canonical local qualification graph and substantive leaf program."
 
 [[gate]]
 name = "ci"
@@ -33,7 +33,7 @@ kind = "ci"
 path = ".github/workflows/ci.yml"
 inputs = [".github/actions/setup-rust/action.yml", ".github/actions/setup-zrail/action.yml"]
 requires = ["check"]
-reason = "Hosted qualification runs the canonical gate and exact package/MSRV lanes."
+reason = "Hosted qualification bootstraps zcheck and executes the canonical local graph."
 
 [[gate]]
 name = "architecture-review"

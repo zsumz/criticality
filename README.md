@@ -94,13 +94,18 @@ assert_eq!(timeline.pop_next().map(|item| item.into_event()), Some("retry"));
 ## Qualification
 
 ```sh
-scripts/check
+cargo +1.96.1 install zcheck --version 0.0.1 --locked
+zcheck
 ```
 
-The canonical gate checks formatting, the `no_std` library build, Clippy,
-tests, rustdoc, package contents, source shape, zrail architecture, and clean
-diffs. Criticality requires Rust 1.88 or newer. `0.0.1-rc.1` is a release
-candidate.
+The checked-in `zcheck.toml` is the complete qualification graph. It checks
+formatting, the `no_std` library build, Clippy, tests, rustdoc, package contents,
+source shape, zrail architecture, and clean diffs. There is no `scripts/check`;
+scripts contain implementation logic while declarative commands stay in the
+manifest.
+
+Criticality requires Rust 1.88 or newer. zcheck builds with Rust 1.96.1 or
+newer. `0.0.1-rc.1` is a release candidate.
 
 ## Scope
 

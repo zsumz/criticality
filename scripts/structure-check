@@ -5,6 +5,16 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 status=0
 
+if [[ -e "$repo_root/scripts/check" || -L "$repo_root/scripts/check" ]]; then
+    echo "error: zcheck.toml replaces the legacy scripts/check dispatcher" >&2
+    status=1
+fi
+
+if [[ ! -f "$repo_root/zcheck.toml" ]]; then
+    echo "error: canonical qualification manifest is missing: zcheck.toml" >&2
+    status=1
+fi
+
 for removed in crates docs reference; do
     if [[ -e "$repo_root/$removed" || -L "$repo_root/$removed" ]]; then
         echo "error: single-crate repository may not contain $removed/" >&2

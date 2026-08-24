@@ -2,7 +2,7 @@
 schema = 1
 semantics = 2
 producer = "0.0.2"
-contract_sha256 = "cc07d2426d6169934fce941c63d931d22803f3c443644bd43e8da86fc447ba03"
+contract_sha256 = "146ffb2447007a7900d918f44b3ea4e285b955febe5bc91250f7cb50799a9b03"
 ratchet = []
 
 [[package]]
@@ -24,8 +24,8 @@ sha256 = "278374ff43731777bc63b5d4945a6cafa620f8dc246761dff757d2a0905cf29d"
 
 [[gate]]
 name = "check"
-path = "scripts/check"
-sha256 = "85b6151d4012669cb7f3a00663d649c7b7562eed8e31cab40f81833c4288ee54"
+path = "zcheck.toml"
+sha256 = "6a0d644fe07c677f488f55317cac4abfb84a49530ca4c4111131894189254774"
 
 [[gate.input]]
 path = ".gitattributes"
@@ -45,7 +45,7 @@ sha256 = "19d1c47296cb00d841dc7f9f50fb084b76e68e8e42788ff78077e201817fe1ac"
 
 [[gate.input]]
 path = "README.md"
-sha256 = "90ab5116053530a690f4a37b37caac43a52b529507b1801ead4a7f180e3eadbb"
+sha256 = "f635c2f3b8a4966b5e06cdad2c8fbbfc1e1b0ee57a76d3e26314faa0035b23af"
 
 [[gate.input]]
 path = "clippy.toml"
@@ -61,7 +61,7 @@ sha256 = "07c347dc7273b4ae0aa3e8451b99059ea8f6ad839e62adc33a273f23d152fa61"
 
 [[gate.input]]
 path = "scripts/structure-check"
-sha256 = "74573cbd78c49490485c4334b39686bf54ab770bc582d04e700e880f8433afa1"
+sha256 = "620c4d4b93ba3dfc7f91c01f5aece68374ac7c8b8224c75f9b534399409d68fd"
 
 [[gate.input]]
 path = "src/lib.rs"
@@ -70,7 +70,7 @@ sha256 = "9a1b7fa6bbfda4300e8f52cda112fdf9fe62cc2fa371d8e6f47a14593672f667"
 [[gate]]
 name = "ci"
 path = ".github/workflows/ci.yml"
-sha256 = "1e632abfeca26d3920f5c163570854e09f6760d4f7d75958ff65b0cf49d5c939"
+sha256 = "0ade285d32261cdf86e2c11bfffdb10632ac8bf6818b5e3c6de0f580cacc6972"
 
 [[gate.input]]
 path = ".github/actions/setup-rust/action.yml"

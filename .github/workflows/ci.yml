@@ -22,8 +22,8 @@ defaults:
     shell: bash
 
 jobs:
-  check:
-    name: canonical gate
+  canonical:
+    name: canonical
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -35,19 +35,21 @@ jobs:
         uses: ./.github/actions/setup-rust
       - name: Set up reviewed zrail
         uses: ./.github/actions/setup-zrail
-      - name: Run canonical gate
-        run: scripts/check
-
-  no-std:
-    name: no-std library
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    steps:
-      - name: Check out source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Install zcheck
+        run: cargo +1.96.1 install zcheck --version 0.0.1 --locked
+      - name: Run canonical zcheck qualification
+        env:
+          ZCHECK_CACHE_DIR: ${{ runner.temp }}/zcheck
+          ZCHECK_EVIDENCE_DIR: ${{ runner.temp }}/zcheck-evidence
+        run: >-
+          zcheck run check
+          --format github
+          --logs-dir "$ZCHECK_EVIDENCE_DIR/logs"
+          --receipt "$ZCHECK_EVIDENCE_DIR/receipt.json"
+      - name: Upload zcheck evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          persist-credentials: false
-      - name: Set up Rust
-        uses: ./.github/actions/setup-rust
-      - name: Check the dependency-free library
-        run: cargo check --lib --locked --offline
+          name: zcheck-canonical
+          path: ${{ runner.temp }}/zcheck-evidence
+          if-no-files-found: error
