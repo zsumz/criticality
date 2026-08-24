@@ -68,6 +68,7 @@ fn retained_measurement_occurs_once_and_snapshot_is_exact() {
         return;
     };
     assert!(record.measurements.get() == 1);
+    assert!(trace.as_slice()[0].id == 1);
     assert!(trace.retained_bytes() == RetainedBytes::new(3));
 }
 

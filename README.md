@@ -30,9 +30,10 @@ Criticality is a dependency-free `no_std + alloc` library. It gives a state
 machine deterministic mechanisms while leaving domain events, transitions,
 effects, scheduling policy, fairness, and failure policy with the consumer.
 
-Every retained collection has explicit count and byte limits. Rejected values
-return to the caller. Time advances only through checked virtual transitions,
-and every replay divergence identifies the first unmatched position.
+Every incrementally admitting container has explicit count and retained-byte
+limits. Finite values such as plans remain bounded by their consumer. Rejected
+values return to the caller. Time advances only through checked virtual
+transitions, and every replay divergence identifies the first unmatched position.
 
 ## Primitives
 
@@ -53,9 +54,9 @@ and must not be reused while capabilities from an earlier incarnation may exist;
 
 ### Plans and scripts
 
-`Plan` describes a finite ordered set of delayed outcomes. `ExactScript`
-matches requests without consuming mismatches, reports exhaustion explicitly,
-and bounds both step count and retained bytes.
+`Plan` describes a finite, consumer-bounded ordered set of delayed outcomes.
+`ExactScript` matches requests without consuming mismatches, reports exhaustion
+explicitly, and bounds both step count and retained bytes.
 
 ### Entropy
 
@@ -66,8 +67,9 @@ scenario's decisions.
 ### Traces and replay
 
 `Trace` records typed observations behind count and retained-byte limits.
-`ExactReplay` advances only on equality and reports the first divergence,
-exhaustion, and remaining records.
+`ExactReplay` borrows finite expected evidence, advances only on equality, and
+reports the first divergence, exhaustion, and remaining records. A trace can
+lend its already-bounded records directly to replay without duplicating them.
 
 ## Start
 

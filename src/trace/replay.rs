@@ -1,6 +1,5 @@
 //! Finite equality-based exact replay positions and divergence reports.
 
-use alloc::boxed::Box;
 use core::fmt;
 
 /// A zero-based position in an exact replay sequence.
@@ -71,17 +70,17 @@ impl fmt::Display for ReplayFailure {
 
 impl core::error::Error for ReplayFailure {}
 
-/// A finite exact sequence of opaque consumer-owned records.
+/// A cursor borrowing a finite exact sequence of opaque consumer-owned records.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub struct ExactReplay<T> {
-    expected: Box<[T]>,
+pub struct ExactReplay<'a, T> {
+    expected: &'a [T],
     position: ReplayPosition,
 }
 
-impl<T> ExactReplay<T> {
-    /// Creates a replay from one exact finite expected sequence.
+impl<'a, T> ExactReplay<'a, T> {
+    /// Creates a replay borrowing one exact finite expected sequence.
     #[must_use]
-    pub fn new(expected: Box<[T]>) -> Self {
+    pub const fn new(expected: &'a [T]) -> Self {
         Self {
             expected,
             position: ReplayPosition::ORIGIN,

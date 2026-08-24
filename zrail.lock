@@ -2,7 +2,7 @@
 schema = 1
 semantics = 2
 producer = "0.0.2"
-contract_sha256 = "9e92903f3d9f98573ddad09e7a74de997a2a04fec25c90589d14be6035aba6e1"
+contract_sha256 = "9e5ab772fc12365f895f7444b57f3103df04cadbf25d06a16a726d5f326adc50"
 ratchet = []
 
 [[package]]
@@ -45,7 +45,7 @@ sha256 = "19d1c47296cb00d841dc7f9f50fb084b76e68e8e42788ff78077e201817fe1ac"
 
 [[gate.input]]
 path = "README.md"
-sha256 = "e7df4f89ff67ce35bbfbd9d6370540b8d8e7f81285814766fc94d2a720f5957c"
+sha256 = "de28b6adb520edb06b6bd91439a7bb9b63edf0747ceffddf2ad3ae6561989613"
 
 [[gate.input]]
 path = "clippy.toml"

@@ -209,6 +209,7 @@ evidence = [
   "rust-test:tests/replay.rs::exact_equality_advances_one_record_at_a_time",
   "rust-test:tests/replay.rs::mismatch_reports_first_position_without_consuming",
   "rust-test:tests/replay.rs::exhaustion_and_remaining_records_are_explicit",
+  "rust-test:tests/replay.rs::trace_replay_borrows_bounded_evidence",
   "gate:check",
   "gate:ci",
 ]

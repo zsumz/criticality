@@ -4,20 +4,15 @@ use alloc::vec::Vec;
 
 use crate::retained::{Retained, RetainedBytes};
 
-use super::{TraceError, TraceFailure, TraceLimits};
-
-#[derive(Clone, Debug)]
-struct Entry<T> {
-    record: T,
-    retained_after: RetainedBytes,
-}
+use super::{ExactReplay, TraceError, TraceFailure, TraceLimits};
 
 /// A bounded, append-only typed trace.
 #[derive(Clone, Debug)]
 pub struct Trace<T> {
     limits: TraceLimits,
     measure: fn(&T) -> RetainedBytes,
-    records: Vec<Entry<T>>,
+    retained: RetainedBytes,
+    records: Vec<T>,
 }
 
 impl<T: Retained> Trace<T> {
@@ -35,6 +30,7 @@ impl<T> Trace<T> {
         Self {
             limits,
             measure,
+            retained: RetainedBytes::ZERO,
             records: Vec::new(),
         }
     }
@@ -59,16 +55,26 @@ impl<T> Trace<T> {
 
     /// Returns variable bytes retained by all records.
     #[must_use]
-    pub fn retained_bytes(&self) -> RetainedBytes {
-        self.records
-            .last()
-            .map_or(RetainedBytes::ZERO, |entry| entry.retained_after)
+    pub const fn retained_bytes(&self) -> RetainedBytes {
+        self.retained
+    }
+
+    /// Borrows all records in exact admission order.
+    #[must_use]
+    pub const fn as_slice(&self) -> &[T] {
+        self.records.as_slice()
     }
 
     /// Iterates over records in exact admission order.
     #[must_use]
     pub fn iter(&self) -> impl ExactSizeIterator<Item = &T> {
-        self.records.iter().map(|entry| &entry.record)
+        self.records.iter()
+    }
+
+    /// Creates an exact replay borrowing this trace's bounded evidence.
+    #[must_use]
+    pub fn replay(&self) -> ExactReplay<'_, T> {
+        ExactReplay::new(self.as_slice())
     }
 
     /// Admits one record or returns it unchanged on failure.
@@ -87,7 +93,7 @@ impl<T> Trace<T> {
             ));
         }
         let measured = (self.measure)(&record);
-        let current = self.retained_bytes();
+        let current = self.retained;
         let Some(retained) = current.checked_add(measured) else {
             return Err(TraceError::new(
                 record,
@@ -107,16 +113,14 @@ impl<T> Trace<T> {
                 },
             ));
         }
-        self.records.push(Entry {
-            record,
-            retained_after: retained,
-        });
+        self.records.push(record);
+        self.retained = retained;
         Ok(())
     }
 
     /// Returns all retained records in exact admission order.
     #[must_use]
     pub fn into_records(self) -> Vec<T> {
-        self.records.into_iter().map(|entry| entry.record).collect()
+        self.records
     }
 }

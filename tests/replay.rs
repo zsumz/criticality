@@ -1,12 +1,14 @@
 //! Public exact replay position and first-divergence contracts.
 
-use std::boxed::Box;
-
-use criticality::trace::{ExactReplay, ReplayFailure, ReplayPosition};
+use criticality::{
+    retained::RetainedBytes,
+    trace::{ExactReplay, ReplayFailure, ReplayPosition, Trace, TraceLimits},
+};
 
 #[test]
 fn exact_equality_advances_one_record_at_a_time() {
-    let mut replay = ExactReplay::new(Box::from([10_u8, 20, 30]));
+    let expected = [10_u8, 20, 30];
+    let mut replay = ExactReplay::new(&expected);
     assert!(replay.position() == ReplayPosition::ORIGIN);
     assert!(replay.expected() == Some(&10));
     assert!(replay.remaining() == 3);
@@ -22,7 +24,8 @@ fn exact_equality_advances_one_record_at_a_time() {
 
 #[test]
 fn mismatch_reports_first_position_without_consuming() {
-    let mut replay = ExactReplay::new(Box::from([10_u8, 20]));
+    let expected = [10_u8, 20];
+    let mut replay = ExactReplay::new(&expected);
     assert!(replay.observe(&10).is_ok());
     let failure = replay.observe(&99);
     assert!(
@@ -38,7 +41,8 @@ fn mismatch_reports_first_position_without_consuming() {
 
 #[test]
 fn exhaustion_and_remaining_records_are_explicit() {
-    let mut replay = ExactReplay::new(Box::from([4_u8, 5]));
+    let expected = [4_u8, 5];
+    let mut replay = ExactReplay::new(&expected);
     assert!(replay.observe(&4).is_ok());
     assert!(
         replay.finish()
@@ -55,4 +59,24 @@ fn exhaustion_and_remaining_records_are_explicit() {
             })
     );
     assert!(replay.position() == ReplayPosition::new(2));
+}
+
+#[test]
+fn trace_replay_borrows_bounded_evidence() {
+    let limits = TraceLimits::new(2, RetainedBytes::ZERO);
+    let first = [10_u8; 9];
+    let second = [20_u8; 9];
+    let mut trace = Trace::with_measure(limits, measure_record);
+    assert!(trace.try_push(first).is_ok());
+    assert!(trace.try_push(second).is_ok());
+
+    let mut replay = trace.replay();
+    assert!(replay.expected() == trace.as_slice().first());
+    assert!(replay.observe(&first).is_ok());
+    assert!(replay.observe(&second).is_ok());
+    assert!(replay.finish().is_ok());
+}
+
+const fn measure_record(_: &[u8; 9]) -> RetainedBytes {
+    RetainedBytes::ZERO
 }
