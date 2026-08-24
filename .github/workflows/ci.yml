@@ -35,8 +35,11 @@ jobs:
         uses: ./.github/actions/setup-rust
       - name: Set up reviewed zrail
         uses: ./.github/actions/setup-zrail
-      - name: Install zcheck
-        run: cargo +1.96.1 install zcheck --version 0.0.1 --locked
+      - name: Set up zcheck
+        uses: zactionsz/setup-zcheck@88ca70422145efd6ab7f4262fb096ecd16372f57
+        with:
+          version: "0.0.2"
+          sha256: a9e3ca964b6f5e86c693edeff4aeaddb46ee9d62f8713d3ded0bb6533b758e53
       - name: Run canonical zcheck qualification
         env:
           ZCHECK_CACHE_DIR: ${{ runner.temp }}/zcheck
