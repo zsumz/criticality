@@ -1,4 +1,6 @@
-<h1 align="center">criticality</h1>
+<p align="center">
+  <img src="./criticality-logo.svg" alt="criticality" width="720">
+</p>
 
 <p align="center">
   <strong>Bounded deterministic simulation primitives for state machines and effect-driven systems.</strong>

@@ -10,7 +10,7 @@ repository_state = "preserve"
 description = "Enforce the single-crate source and documentation shape."
 run = ["scripts/structure-check"]
 tools = ["bash", "find", "git", "grep", "sort", "tr", "wc"]
-inputs = ["scripts/structure-check", "Cargo.toml", "README.md", "src/lib.rs"]
+inputs = ["scripts/structure-check", "Cargo.toml", "README.md", "criticality-logo.svg", "src/lib.rs"]
 
 [tasks.zrail]
 description = "Enforce the reviewed architecture policy."

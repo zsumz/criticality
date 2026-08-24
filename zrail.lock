@@ -2,7 +2,7 @@
 schema = 1
 semantics = 2
 producer = "0.0.2"
-contract_sha256 = "146ffb2447007a7900d918f44b3ea4e285b955febe5bc91250f7cb50799a9b03"
+contract_sha256 = "a2eab4b2892b2cbe9790b659075a8195ee9ffbfa87ab5796de2e4b0f00f19652"
 ratchet = []
 
 [[package]]
@@ -25,7 +25,7 @@ sha256 = "278374ff43731777bc63b5d4945a6cafa620f8dc246761dff757d2a0905cf29d"
 [[gate]]
 name = "check"
 path = "zcheck.toml"
-sha256 = "6a0d644fe07c677f488f55317cac4abfb84a49530ca4c4111131894189254774"
+sha256 = "e012a2b4a1e8654daaa235f001849e225ded6bcb228be632ceaaa07c8fb764ec"
 
 [[gate.input]]
 path = ".gitattributes"
@@ -45,11 +45,15 @@ sha256 = "19d1c47296cb00d841dc7f9f50fb084b76e68e8e42788ff78077e201817fe1ac"
 
 [[gate.input]]
 path = "README.md"
-sha256 = "f635c2f3b8a4966b5e06cdad2c8fbbfc1e1b0ee57a76d3e26314faa0035b23af"
+sha256 = "5e7f322163ebc59cde06276b75772da591226b4843917509097cd940868bd2ca"
 
 [[gate.input]]
 path = "clippy.toml"
 sha256 = "d11998a49687dcc509cdd3c37063f74dc29d006ac05adc0b1e9a20d0a2f4904b"
+
+[[gate.input]]
+path = "criticality-logo.svg"
+sha256 = "46f905f446be914dbafcba06c8f8172464cab67d0ba3caaa0a0186635b5afa18"
 
 [[gate.input]]
 path = "rust-toolchain.toml"

@@ -23,6 +23,7 @@ inputs = [
   "Cargo.toml",
   "Cargo.lock",
   "README.md",
+  "criticality-logo.svg",
   "src/lib.rs",
 ]
 reason = "The repository's canonical local qualification graph and substantive leaf program."
