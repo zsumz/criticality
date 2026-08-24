@@ -25,7 +25,7 @@ enum Phase {
 }
 
 #[test]
-fn cancellation_returns_ownership_and_restores_accounting() {
+fn cancellation_returns_ownership_and_releases_accounting() {
     let limits = TimelineLimits::new(2, RetainedBytes::new(8));
     let mut timeline = Timeline::<Event, Phase>::new(TimelineId::new(1), limits);
     let result = timeline.schedule_after_in(Span::from_ticks(5), Phase::Timer, event(7, 8));
@@ -60,6 +60,33 @@ fn foreign_tokens_cannot_cancel_local_events() {
     assert!(second.cancel(foreign).is_none());
     assert!(second.len() == 1);
     assert!(second.cancel(local) == Some(event(2, 0)));
+}
+
+#[test]
+fn stale_tokens_cannot_cancel_events_in_a_new_incarnation() {
+    let limits = TimelineLimits::new(1, RetainedBytes::ZERO);
+    let at = Moment::from_tick(3);
+    let mut earlier = Timeline::<Event, Phase>::new(TimelineId::new(7), limits);
+    let stale = earlier.schedule_at_in(at, Phase::Timer, event(1, 0));
+    assert!(stale.is_ok());
+    let Ok(stale) = stale else {
+        return;
+    };
+    drop(earlier);
+
+    let mut current =
+        Timeline::<Event, Phase>::empty_at(TimelineId::new(8), Moment::ORIGIN, limits);
+    let admitted = current.schedule_at_in(at, Phase::Timer, event(2, 0));
+    assert!(admitted.is_ok());
+    let Ok(admitted) = admitted else {
+        return;
+    };
+
+    assert!(stale.id() == admitted.id());
+    assert!(stale.at() == admitted.at());
+    assert!(stale.phase() == admitted.phase());
+    assert!(current.cancel(stale).is_none());
+    assert!(current.cancel(admitted) == Some(event(2, 0)));
 }
 
 const fn event(id: u8, bytes: u64) -> Event {

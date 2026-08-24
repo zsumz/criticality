@@ -60,7 +60,7 @@ fn count_and_byte_rejections_preserve_event_ownership() {
 #[test]
 fn overflow_and_past_rejections_leave_timeline_unchanged() {
     let limits = TimelineLimits::new(2, RetainedBytes::new(u64::MAX));
-    let mut timeline = Timeline::at(TimelineId::new(2), Moment::from_tick(5), limits);
+    let mut timeline = Timeline::empty_at(TimelineId::new(2), Moment::from_tick(5), limits);
     let past = event(1, 1);
     let result = timeline.schedule_at(Moment::from_tick(4), past);
     assert!(result.is_err(), "past scheduling must reject");
@@ -89,7 +89,7 @@ fn overflow_and_past_rejections_leave_timeline_unchanged() {
 
 #[test]
 fn relative_time_overflow_and_zero_capacity_preserve_events() {
-    let mut full_time = Timeline::at(
+    let mut full_time = Timeline::empty_at(
         TimelineId::new(3),
         Moment::from_tick(u64::MAX),
         TimelineLimits::new(1, RetainedBytes::new(1)),

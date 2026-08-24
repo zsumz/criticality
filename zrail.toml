@@ -121,8 +121,9 @@ title = "Cancellation is exact, timeline-scoped, and returns event ownership"
 status = "enforced"
 document = "README.md#timeline"
 evidence = [
-  "rust-test:tests/timeline_cancellation.rs::cancellation_returns_ownership_and_restores_accounting",
+  "rust-test:tests/timeline_cancellation.rs::cancellation_returns_ownership_and_releases_accounting",
   "rust-test:tests/timeline_cancellation.rs::foreign_tokens_cannot_cancel_local_events",
+  "rust-test:tests/timeline_cancellation.rs::stale_tokens_cannot_cancel_events_in_a_new_incarnation",
   "gate:check",
   "gate:ci",
 ]

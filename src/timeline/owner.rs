@@ -47,10 +47,10 @@ impl<E: Retained, P: Copy + Ord> Timeline<E, P> {
         Self::with_measure(id, limits, E::retained_bytes)
     }
 
-    /// Creates an empty timeline restored at an explicit virtual moment.
+    /// Creates an empty timeline at an explicit virtual moment.
     #[must_use]
-    pub fn at(id: TimelineId, now: Moment, limits: TimelineLimits) -> Self {
-        Self::at_with_measure(id, now, limits, E::retained_bytes)
+    pub fn empty_at(id: TimelineId, now: Moment, limits: TimelineLimits) -> Self {
+        Self::empty_at_with_measure(id, now, limits, E::retained_bytes)
     }
 }
 
@@ -62,12 +62,12 @@ impl<E, P: Copy + Ord> Timeline<E, P> {
         limits: TimelineLimits,
         measure: fn(&E) -> RetainedBytes,
     ) -> Self {
-        Self::at_with_measure(id, Moment::ORIGIN, limits, measure)
+        Self::empty_at_with_measure(id, Moment::ORIGIN, limits, measure)
     }
 
-    /// Creates a restored timeline using an explicit event measurement function.
+    /// Creates an empty timeline at an explicit moment using an event measure.
     #[must_use]
-    pub fn at_with_measure(
+    pub fn empty_at_with_measure(
         id: TimelineId,
         now: Moment,
         limits: TimelineLimits,

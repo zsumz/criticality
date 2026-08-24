@@ -2,13 +2,18 @@
 
 use crate::time::Moment;
 
-/// Stable identity of one timeline owner.
+/// Incarnation identity of one independently created timeline owner.
+///
+/// Consumers must not reuse an identity for another timeline while tokens from
+/// the earlier incarnation may still exist. Creating an empty timeline at an
+/// explicit moment starts event identity at zero; it does not restore a prior
+/// incarnation's identity sequence.
 #[repr(transparent)]
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct TimelineId(u64);
 
 impl TimelineId {
-    /// Creates a timeline identity.
+    /// Creates a timeline incarnation identity.
     #[must_use]
     pub const fn new(value: u64) -> Self {
         Self(value)

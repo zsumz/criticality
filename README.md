@@ -47,7 +47,9 @@ admission instead of an implicit property of a container.
 `Timeline` orders owned events by virtual moment, finite consumer-defined phase,
 and stable insertion identity. Phases must be `Copy + Ord`; variable retained
 data belongs in the measured event. Scheduling and cancellation are bounded,
-timeline-scoped, and ownership-preserving.
+timeline-scoped, and ownership-preserving. A `TimelineId` names one incarnation
+and must not be reused while capabilities from an earlier incarnation may exist;
+`Timeline::empty_at` creates a new empty timeline rather than restoring one.
 
 ### Plans and scripts
 
