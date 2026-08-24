@@ -1,0 +1,301 @@
+schema = 1
+adapters = ["rust"]
+
+[repository]
+roots = ["."]
+exclude = []
+workspace_members = "exact"
+nested_git = "deny"
+submodules = "deny"
+symlinks = "inside"
+
+[[gate]]
+name = "check"
+kind = "local"
+path = "scripts/check"
+inputs = [
+  "scripts/structure-check",
+  "rust-toolchain.toml",
+  "rustfmt.toml",
+  "clippy.toml",
+  ".gitattributes",
+  ".gitignore",
+  "Cargo.toml",
+  "Cargo.lock",
+  "README.md",
+  "src/lib.rs",
+]
+reason = "The repository's canonical local qualification entrypoint."
+
+[[gate]]
+name = "ci"
+kind = "ci"
+path = ".github/workflows/ci.yml"
+inputs = [".github/actions/setup-rust/action.yml", ".github/actions/setup-zrail/action.yml"]
+requires = ["check"]
+reason = "Hosted qualification runs the canonical gate and exact package/MSRV lanes."
+
+[[gate]]
+name = "architecture-review"
+kind = "ci"
+path = ".github/workflows/authority.yml"
+inputs = [".github/actions/setup-rust/action.yml", ".github/actions/setup-zrail/action.yml"]
+requires = ["check"]
+reason = "Protected-base analysis reviews proposed source as data."
+
+[[invariant]]
+id = "BOUNDARY-01"
+title = "The core remains dependency-free, no-std, and policy-neutral"
+status = "enforced"
+document = "README.md#scope"
+evidence = [
+  "rust-test:tests/public_boundary.rs::core_manifest_and_facade_preserve_initial_boundary",
+  "gate:check",
+  "gate:ci",
+  "gate:architecture-review",
+]
+
+[[invariant]]
+id = "LAYOUT-01"
+title = "The repository remains a single crate with one README"
+status = "enforced"
+document = "README.md#qualification"
+evidence = [
+  "rust-test:tests/public_boundary.rs::package_identity_is_explicit",
+  "gate:check",
+  "gate:ci",
+  "gate:architecture-review",
+]
+
+[[invariant]]
+id = "TIME-01"
+title = "Virtual time is fixed-width, monotonic, and checked"
+status = "enforced"
+document = "README.md#time-and-retention"
+evidence = [
+  "rust-test:tests/time.rs::virtual_time_never_moves_backward",
+  "rust-test:tests/time.rs::virtual_time_overflow_preserves_the_clock",
+  "gate:check",
+  "gate:ci",
+]
+
+[[invariant]]
+id = "RETAINED-01"
+title = "Retained-memory accounting is fixed-width and checked"
+status = "enforced"
+document = "README.md#time-and-retention"
+evidence = [
+  "rust-test:tests/retained.rs::retained_bytes_use_checked_fixed_width_accounting",
+  "rust-test:tests/retained.rs::retained_measurement_is_consumer_owned_and_repeatable",
+  "gate:check",
+  "gate:ci",
+]
+
+[[invariant]]
+id = "TIMELINE-ORDER-01"
+title = "Timeline delivery is ordered by moment, consumer phase, and event identity"
+status = "enforced"
+document = "README.md#timeline"
+evidence = [
+  "rust-test:tests/timeline_ordering.rs::timeline_orders_by_moment_phase_and_insertion_identity",
+  "gate:check",
+  "gate:ci",
+]
+
+[[invariant]]
+id = "TIMELINE-ADMISSION-01"
+title = "Timeline admission is bounded and preserves rejected event ownership"
+status = "enforced"
+document = "README.md#timeline"
+evidence = [
+  "rust-test:tests/timeline_limits.rs::count_and_byte_rejections_preserve_event_ownership",
+  "rust-test:tests/timeline_limits.rs::overflow_and_past_rejections_leave_timeline_unchanged",
+  "gate:check",
+  "gate:ci",
+]
+
+[[invariant]]
+id = "TIMELINE-CANCEL-01"
+title = "Cancellation is exact, timeline-scoped, and returns event ownership"
+status = "enforced"
+document = "README.md#timeline"
+evidence = [
+  "rust-test:tests/timeline_cancellation.rs::cancellation_returns_ownership_and_restores_accounting",
+  "rust-test:tests/timeline_cancellation.rs::foreign_tokens_cannot_cancel_local_events",
+  "gate:check",
+  "gate:ci",
+]
+
+[[invariant]]
+id = "PLAN-01"
+title = "Finite plans preserve exact delayed-outcome order and ownership"
+status = "enforced"
+document = "README.md#plans-and-scripts"
+evidence = [
+  "rust-test:tests/plan.rs::finite_plans_preserve_exact_order_and_cardinality",
+  "rust-test:tests/timeline_planned.rs::planned_outcomes_schedule_with_owned_delay_and_phase",
+  "gate:check",
+  "gate:ci",
+]
+
+[[invariant]]
+id = "SCRIPT-MATCH-01"
+title = "Exact script mismatch is non-consuming and exhaustion is explicit"
+status = "enforced"
+document = "README.md#plans-and-scripts"
+evidence = [
+  "rust-test:tests/script_matching.rs::mismatch_is_non_consuming_and_exhaustion_is_explicit",
+  "gate:check",
+  "gate:ci",
+]
+
+[[invariant]]
+id = "SCRIPT-ADMISSION-01"
+title = "Exact script admission is count and byte bounded and preserves ownership"
+status = "enforced"
+document = "README.md#plans-and-scripts"
+evidence = [
+  "rust-test:tests/script_limits.rs::step_and_outcome_limits_preserve_all_supplied_steps",
+  "rust-test:tests/script_limits.rs::byte_capacity_and_overflow_are_distinct_and_ownership_preserving",
+  "gate:check",
+  "gate:ci",
+]
+
+[[invariant]]
+id = "ENTROPY-STREAM-01"
+title = "Entropy output is versioned, portable, explicit, and stream-isolated"
+status = "enforced"
+document = "README.md#entropy"
+evidence = [
+  "rust-test:tests/entropy.rs::splitmix64_has_portable_versioned_vectors",
+  "rust-test:tests/entropy.rs::independent_streams_are_stable_under_unrelated_draws",
+  "gate:check",
+  "gate:ci",
+]
+
+[[invariant]]
+id = "ENTROPY-INDEX-01"
+title = "Bounded-index selection is versioned, unbiased, and rejects empty domains"
+status = "enforced"
+document = "README.md#entropy"
+evidence = [
+  "rust-test:tests/entropy.rs::bounded_index_mapping_has_portable_versioned_vectors",
+  "rust-test:tests/entropy.rs::empty_bound_is_explicit_and_does_not_consume_entropy",
+  "gate:check",
+  "gate:ci",
+]
+
+[[invariant]]
+id = "TRACE-ADMISSION-01"
+title = "Trace admission is bounded, measured once, and ownership preserving"
+status = "enforced"
+document = "README.md#traces-and-replay"
+evidence = [
+  "rust-test:tests/trace_limits.rs::count_and_byte_rejections_preserve_record_ownership",
+  "rust-test:tests/trace_limits.rs::retained_measurement_occurs_once_and_snapshot_is_exact",
+  "rust-test:tests/trace_limits.rs::retained_byte_overflow_is_distinct_and_non_mutating",
+  "gate:check",
+  "gate:ci",
+]
+
+[[invariant]]
+id = "REPLAY-EXACT-01"
+title = "Exact replay advances only on equality and reports first divergence"
+status = "enforced"
+document = "README.md#traces-and-replay"
+evidence = [
+  "rust-test:tests/replay.rs::exact_equality_advances_one_record_at_a_time",
+  "rust-test:tests/replay.rs::mismatch_reports_first_position_without_consuming",
+  "rust-test:tests/replay.rs::exhaustion_and_remaining_records_are_explicit",
+  "gate:check",
+  "gate:ci",
+]
+
+[dependencies]
+mode = "locked"
+unassigned_packages = "deny"
+cycles = "deny"
+
+[source.rust]
+module_docs = "required"
+facades = "declarative"
+entrypoints = "declarative"
+tests = "sibling"
+
+[source.rust.macros]
+mode = "deny-unreviewed"
+
+[[source.rust.macros.allow]]
+name = "Clone"
+reason = "Public deterministic values use Rust's built-in Clone derive."
+
+[[source.rust.macros.allow]]
+name = "Copy"
+reason = "Fixed-width values and errors use Rust's built-in Copy derive."
+
+[[source.rust.macros.allow]]
+name = "Debug"
+reason = "Public values and errors use Rust's built-in Debug derive."
+
+[[source.rust.macros.allow]]
+name = "Default"
+reason = "Zero-origin value types use Rust's built-in Default derive."
+
+[[source.rust.macros.allow]]
+name = "Eq"
+reason = "Deterministic values and errors use Rust's built-in Eq derive."
+
+[[source.rust.macros.allow]]
+name = "Hash"
+reason = "Structural simulation values use Rust's built-in Hash derive."
+
+[[source.rust.macros.allow]]
+name = "Ord"
+reason = "Time and byte values use Rust's built-in total ordering derive."
+
+[[source.rust.macros.allow]]
+name = "PartialEq"
+reason = "Public values and errors use Rust's built-in PartialEq derive."
+
+[[source.rust.macros.allow]]
+name = "PartialOrd"
+reason = "Time and byte values use Rust's built-in partial ordering derive."
+
+[[source.rust.macros.allow]]
+name = "assert"
+reason = "Tests use Rust's standard assertion expansion."
+
+[[source.rust.macros.allow]]
+name = "format"
+reason = "Tests construct bounded expected facade declarations."
+
+[source.rust.hygiene]
+unsafe = "deny"
+lint_suppressions = "deny"
+deny_methods = ["unwrap", "expect"]
+deny_macros = ["panic", "todo", "unimplemented", "unreachable", "dbg"]
+
+[source.rust.size.facade]
+target = 80
+hard = 120
+
+[source.rust.size.implementation]
+target = 240
+hard = 300
+
+[source.rust.size.test]
+target = 300
+hard = 300
+
+[source.rust.size.auxiliary]
+target = 300
+hard = 300
+
+[[layer]]
+name = "core"
+packages = ["criticality"]
+may_depend_on = []
+reason = "The dependency-free deterministic substrate owns only neutral mechanisms."
+
+[layer.dependencies]
+external = "locked"
