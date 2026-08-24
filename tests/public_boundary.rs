@@ -24,6 +24,6 @@ fn core_manifest_and_facade_preserve_initial_boundary() {
 #[test]
 fn package_identity_is_explicit() {
     assert!(MANIFEST.contains("name = \"criticality\""));
-    assert!(MANIFEST.contains("version = \"0.0.1-rc.1\""));
+    assert!(MANIFEST.contains("version = \"0.0.1-rc.2\""));
     assert!(MANIFEST.contains("rust-version = \"1.88\""));
 }

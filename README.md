@@ -85,7 +85,7 @@ batch policy before repeated consumers demonstrate the same requirement.
 
 ```toml
 [dependencies]
-criticality = "=0.0.1-rc.1"
+criticality = "=0.0.1-rc.2"
 ```
 
 Schedule an event with explicit limits and virtual time:
@@ -122,7 +122,7 @@ zrail architecture, and clean diffs. There is no `scripts/check`; scripts
 contain implementation logic while declarative commands stay in the manifest.
 
 Criticality requires Rust 1.88 or newer. zcheck builds with Rust 1.96.1 or
-newer. `0.0.1-rc.1` is a release candidate.
+newer. `0.0.1-rc.2` is a release candidate.
 
 ## Scope
 

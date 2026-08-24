@@ -1,6 +1,6 @@
 [package]
 name = "criticality"
-version = "0.0.1-rc.1"
+version = "0.0.1-rc.2"
 description = "Bounded deterministic simulation primitives for state machines and effect-driven systems"
 edition = "2024"
 license = "Apache-2.0"

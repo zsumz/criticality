@@ -37,15 +37,15 @@ sha256 = "3a9b3edae61aeebcff5a2196c932facd67317f4127d272403c334386b134e6f9"
 
 [[gate.input]]
 path = "Cargo.lock"
-sha256 = "a4efd574bbf10eeec0ca2855b91a6dbb79aebd6ee7e1d57282ccad6bac7438c9"
+sha256 = "0ea28a92fec2b6166c7cfd085dde03770ddff28e380d700de814164d8460a404"
 
 [[gate.input]]
 path = "Cargo.toml"
-sha256 = "29a7ddf637e19fbf9c4f566fa0b848d51c64ecbe104cc8454a4ea2014cb51433"
+sha256 = "0d4c76e18bf6c8e6504a0f5b90b47d9e6965c7ba232bdca0fb6b9b554e245fde"
 
 [[gate.input]]
 path = "README.md"
-sha256 = "6ef55442a23fc49d193d59265ffe239765e499657e71b371a01222117e0e910a"
+sha256 = "bf702ea0e84a9437bb54efa7955fe003852976404e0bf5d68c59bacfb302b2e2"
 
 [[gate.input]]
 path = "clippy.toml"
