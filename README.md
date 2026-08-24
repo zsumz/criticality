@@ -116,10 +116,10 @@ zcheck
 ```
 
 The checked-in `zcheck.toml` is the complete qualification graph. It checks
-formatting, the `no_std` library build, Clippy, tests, rustdoc, package contents,
-source shape, zrail architecture, and clean diffs. There is no `scripts/check`;
-scripts contain implementation logic while declarative commands stay in the
-manifest.
+formatting, host and `thumbv7em-none-eabi` `no_std` library builds, Clippy,
+tests, rustdoc, the crate archive against `package-contents.txt`, source shape,
+zrail architecture, and clean diffs. There is no `scripts/check`; scripts
+contain implementation logic while declarative commands stay in the manifest.
 
 Criticality requires Rust 1.88 or newer. zcheck builds with Rust 1.96.1 or
 newer. `0.0.1-rc.1` is a release candidate.

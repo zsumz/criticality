@@ -2,7 +2,7 @@
 schema = 1
 semantics = 2
 producer = "0.0.2"
-contract_sha256 = "c42a0913891f5e7ea8ce7ad47afbebcd93e0b31c95f342e443b169a51d28bbbc"
+contract_sha256 = "de1d4d9370fa88c66e1a5ff238da5bbbacd064366fa986b816141153df2a788f"
 ratchet = []
 
 [[package]]
@@ -16,7 +16,7 @@ sha256 = "a0ba666e4d641949a4b2062167f9c1b58d96d14c61ef1067c568cffdc70f0152"
 
 [[gate.input]]
 path = ".github/actions/setup-rust/action.yml"
-sha256 = "6fa929d6c33d0cfe26394a7f531579bee260e41f7ee3f0a43d458cb21e5c1d30"
+sha256 = "0fad709951e22e43479668b30546b647abc406a7f849e1a12488386b0b12fe92"
 
 [[gate.input]]
 path = ".github/actions/setup-zrail/action.yml"
@@ -25,7 +25,7 @@ sha256 = "278374ff43731777bc63b5d4945a6cafa620f8dc246761dff757d2a0905cf29d"
 [[gate]]
 name = "check"
 path = "zcheck.toml"
-sha256 = "e012a2b4a1e8654daaa235f001849e225ded6bcb228be632ceaaa07c8fb764ec"
+sha256 = "6d9edc5fb5a3e4c026336a1fabf418133fb59ac4f3b1a4369578027a53bbf3b1"
 
 [[gate.input]]
 path = ".gitattributes"
@@ -41,11 +41,11 @@ sha256 = "a4efd574bbf10eeec0ca2855b91a6dbb79aebd6ee7e1d57282ccad6bac7438c9"
 
 [[gate.input]]
 path = "Cargo.toml"
-sha256 = "19d1c47296cb00d841dc7f9f50fb084b76e68e8e42788ff78077e201817fe1ac"
+sha256 = "29a7ddf637e19fbf9c4f566fa0b848d51c64ecbe104cc8454a4ea2014cb51433"
 
 [[gate.input]]
 path = "README.md"
-sha256 = "592bab739586cac517c13ab84d207424abdf20872b062c52ea360e674b6e37f0"
+sha256 = "6ef55442a23fc49d193d59265ffe239765e499657e71b371a01222117e0e910a"
 
 [[gate.input]]
 path = "clippy.toml"
@@ -56,12 +56,20 @@ path = "criticality-logo.svg"
 sha256 = "46f905f446be914dbafcba06c8f8172464cab67d0ba3caaa0a0186635b5afa18"
 
 [[gate.input]]
+path = "package-contents.txt"
+sha256 = "6315c09ee0370844ac6b67209673568a769b0d571cbb1abbd5e7e3e1d2ead893"
+
+[[gate.input]]
 path = "rust-toolchain.toml"
-sha256 = "1492287aa0b458ad3277d11eae2175fb662a33e7d7958ec99a057973f2bac1a2"
+sha256 = "47d4fb141da2fb5b820292381b4962b280d13ad0d68417f980d32119764e7a69"
 
 [[gate.input]]
 path = "rustfmt.toml"
 sha256 = "07c347dc7273b4ae0aa3e8451b99059ea8f6ad839e62adc33a273f23d152fa61"
+
+[[gate.input]]
+path = "scripts/package-check"
+sha256 = "af5673d423f3c5a994211e9dcc45d1817d80cf63df62212941ed32281860f9fa"
 
 [[gate.input]]
 path = "scripts/structure-check"
@@ -78,7 +86,7 @@ sha256 = "0ade285d32261cdf86e2c11bfffdb10632ac8bf6818b5e3c6de0f580cacc6972"
 
 [[gate.input]]
 path = ".github/actions/setup-rust/action.yml"
-sha256 = "6fa929d6c33d0cfe26394a7f531579bee260e41f7ee3f0a43d458cb21e5c1d30"
+sha256 = "0fad709951e22e43479668b30546b647abc406a7f849e1a12488386b0b12fe92"
 
 [[gate.input]]
 path = ".github/actions/setup-zrail/action.yml"

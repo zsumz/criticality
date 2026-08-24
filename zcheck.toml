@@ -38,11 +38,21 @@ run = ["cargo", "fmt", "--all", "--", "--check"]
 tools = ["cargo"]
 resources = ["cargo-target"]
 
-[tasks.no-std]
-description = "Check the dependency-free no-std library."
+[tasks.no-std-host]
+description = "Check the dependency-free no-std library on the host."
 run = ["cargo", "check", "--lib", "--locked", "--offline"]
 tools = ["cargo"]
 resources = ["cargo-target"]
+
+[tasks.no-std-target]
+description = "Check no-std against a target without a standard library."
+run = ["cargo", "check", "--lib", "--locked", "--offline", "--target", "thumbv7em-none-eabi"]
+tools = ["cargo"]
+resources = ["cargo-target"]
+
+[tasks.no-std]
+description = "Prove no-std on host and thumbv7em-none-eabi targets."
+needs = ["no-std-host", "no-std-target"]
 
 [tasks.clippy]
 description = "Run Clippy across every target with warnings denied."
@@ -72,11 +82,11 @@ description = "Validate deterministic library behavior."
 needs = ["test"]
 
 [tasks.package]
-description = "Build and verify the publishable crate archive."
-run = ["cargo", "package", "--locked", "--offline", "--allow-dirty"]
-tools = ["cargo"]
+description = "Build and verify the exact publishable crate archive."
+run = ["scripts/package-check"]
+tools = ["bash", "cargo", "diff", "mktemp", "rm", "sort"]
 resources = ["cargo-target"]
-inputs = ["Cargo.toml", "Cargo.lock", "README.md"]
+inputs = ["scripts/package-check", "package-contents.txt", "Cargo.toml", "Cargo.lock", "README.md"]
 
 [tasks.check]
 description = "Run complete local criticality qualification."

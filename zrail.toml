@@ -14,7 +14,9 @@ name = "check"
 kind = "local"
 path = "zcheck.toml"
 inputs = [
+  "scripts/package-check",
   "scripts/structure-check",
+  "package-contents.txt",
   "rust-toolchain.toml",
   "rustfmt.toml",
   "clippy.toml",
@@ -183,6 +185,8 @@ document = "README.md#entropy"
 evidence = [
   "rust-test:tests/entropy.rs::bounded_index_mapping_has_portable_versioned_vectors",
   "rust-test:tests/entropy.rs::empty_bound_is_explicit_and_does_not_consume_entropy",
+  "rust-test:tests/entropy.rs::edge_bounds_and_forced_rejection_paths_are_exercised",
+  "rust-test:tests/entropy.rs::reduced_width_model_is_exhaustively_uniform",
   "gate:check",
   "gate:ci",
 ]
@@ -283,6 +287,14 @@ reason = "Time and byte values use Rust's built-in partial ordering derive."
 [[source.rust.macros.allow]]
 name = "assert"
 reason = "Tests use Rust's standard assertion expansion."
+
+[[source.rust.macros.allow]]
+name = "assert_eq"
+reason = "Tests use diagnostic equality assertions."
+
+[[source.rust.macros.allow]]
+name = "matches"
+reason = "Tests use diagnostic enum-pattern assertions."
 
 [[source.rust.macros.allow]]
 name = "format"

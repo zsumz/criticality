@@ -14,6 +14,7 @@ runs:
         rustup toolchain install "${{ inputs.toolchain }}"
         --profile minimal
         --component clippy,rustfmt
+        --target thumbv7em-none-eabi
     - name: Select Rust toolchain
       shell: bash
       run: rustup override set "${{ inputs.toolchain }}"

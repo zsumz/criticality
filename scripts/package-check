@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Build the crate archive and compare its contents with the reviewed allowlist.
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+actual="$(mktemp "${TMPDIR:-/tmp}/criticality-package.XXXXXX")"
+trap 'rm -f "$actual"' EXIT
+
+cargo package --manifest-path "$repo_root/Cargo.toml" --locked --offline --allow-dirty
+cargo package --manifest-path "$repo_root/Cargo.toml" --list --allow-dirty \
+    | LC_ALL=C sort > "$actual"
+LC_ALL=C sort -c "$repo_root/package-contents.txt"
+diff -u "$repo_root/package-contents.txt" "$actual"
+
+echo "package contents match the reviewed allowlist"

@@ -9,6 +9,14 @@ rust-version = "1.88"
 readme = "README.md"
 keywords = ["deterministic", "no-std", "simulation", "state-machine", "testing"]
 categories = ["development-tools::testing", "no-std"]
+include = [
+    "Cargo.lock",
+    "LICENSE",
+    "README.md",
+    "criticality-logo.svg",
+    "src/**/*.rs",
+    "tests/**/*.rs",
+]
 
 [dependencies]
 
