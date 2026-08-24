@@ -24,7 +24,9 @@ impl<T> Planned<T> {
         self.delay
     }
 
-    pub(crate) const fn outcome(&self) -> &T {
+    /// Borrows the planned outcome.
+    #[must_use]
+    pub const fn outcome(&self) -> &T {
         &self.outcome
     }
 
@@ -85,8 +87,16 @@ impl<T> Plan<T> {
         self.outcomes.is_empty()
     }
 
-    pub(crate) const fn outcomes(&self) -> &[Planned<T>] {
+    /// Borrows delayed outcomes in plan order.
+    #[must_use]
+    pub const fn as_slice(&self) -> &[Planned<T>] {
         &self.outcomes
+    }
+
+    /// Iterates over delayed outcomes in plan order.
+    #[must_use]
+    pub fn iter(&self) -> impl ExactSizeIterator<Item = &Planned<T>> {
+        self.outcomes.iter()
     }
 
     /// Returns delayed outcomes in plan order.

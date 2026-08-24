@@ -33,6 +33,7 @@ fn planned_outcomes_schedule_with_owned_delay_and_phase() {
     let Ok(token) = result else {
         return;
     };
+    assert!(token.timeline_id() == TimelineId::new(1));
     assert!(token.at() == Moment::from_tick(7));
     assert!(token.phase() == &Phase::External);
 

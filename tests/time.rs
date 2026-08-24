@@ -7,6 +7,7 @@ use criticality::time::{ClockError, Deadline, Moment, Span, VirtualClock};
 const CONST_MOMENT: Moment = Moment::from_tick(7);
 const CONST_SPAN: Span = Span::from_ticks(5);
 const CONST_ADVANCED: Option<Moment> = CONST_MOMENT.checked_add(CONST_SPAN);
+const CONST_ELAPSED: Option<Span> = Moment::from_tick(12).checked_duration_since(CONST_MOMENT);
 const CONST_DEADLINE: Deadline = Deadline::at(Moment::from_tick(12));
 const CONST_CLOCK: VirtualClock = VirtualClock::at(CONST_MOMENT);
 
@@ -27,6 +28,7 @@ fn time_values_preserve_the_fixed_tick_domain() {
     require_error::<ClockError>();
 
     assert!(CONST_ADVANCED == Some(Moment::from_tick(12)));
+    assert!(CONST_ELAPSED == Some(Span::from_ticks(5)));
     assert!(CONST_DEADLINE.moment() == Moment::from_tick(12));
     assert!(CONST_CLOCK.now() == Moment::from_tick(7));
     assert!(Moment::ORIGIN.tick() == 0);
@@ -38,6 +40,11 @@ fn time_values_preserve_the_fixed_tick_domain() {
     assert!(
         Moment::from_tick(u64::MAX)
             .checked_add(Span::from_ticks(1))
+            .is_none()
+    );
+    assert!(
+        Moment::from_tick(6)
+            .checked_duration_since(Moment::from_tick(7))
             .is_none()
     );
     assert!(

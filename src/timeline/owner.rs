@@ -155,7 +155,7 @@ impl<E, P: Copy + Ord> Timeline<E, P> {
     /// Tokens from other timelines and tokens for events no longer pending do
     /// not mutate this timeline and return `None`.
     pub fn cancel(&mut self, token: EventToken<P>) -> Option<E> {
-        if token.timeline() != self.id {
+        if token.timeline_id() != self.id {
             return None;
         }
         let key = token.into_key();

@@ -31,6 +31,15 @@ impl Moment {
             None => None,
         }
     }
+
+    /// Returns elapsed time since `earlier`, or `None` if it is later.
+    #[must_use]
+    pub const fn checked_duration_since(self, earlier: Self) -> Option<Span> {
+        match self.0.checked_sub(earlier.0) {
+            Some(ticks) => Some(Span(ticks)),
+            None => None,
+        }
+    }
 }
 
 /// A nonnegative duration in abstract simulation ticks.

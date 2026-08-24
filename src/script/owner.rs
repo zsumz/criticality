@@ -206,7 +206,7 @@ fn measure_step<Q, R>(
     measure_response: fn(&R) -> RetainedBytes,
 ) -> Option<RetainedBytes> {
     let mut total = measure_request(step.expected());
-    for outcome in step.response().outcomes() {
+    for outcome in step.response().as_slice() {
         total = total.checked_add(measure_response(outcome.outcome()))?;
     }
     Some(total)

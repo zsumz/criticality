@@ -62,7 +62,9 @@ impl<P> EventToken<P> {
         }
     }
 
-    pub(crate) const fn timeline(&self) -> TimelineId {
+    /// Returns the timeline incarnation identity.
+    #[must_use]
+    pub const fn timeline_id(&self) -> TimelineId {
         self.timeline
     }
 
