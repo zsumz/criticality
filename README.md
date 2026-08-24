@@ -56,7 +56,8 @@ and must not be reused while capabilities from an earlier incarnation may exist;
 
 `Plan` describes a finite, consumer-bounded ordered set of delayed outcomes.
 `ExactScript` matches requests without consuming mismatches, reports exhaustion
-explicitly, and bounds both step count and retained bytes.
+and mismatches at their exact positions, and bounds both step count and retained
+bytes.
 
 ### Entropy
 

@@ -7,6 +7,28 @@ use crate::retained::RetainedBytes;
 
 use super::ScriptStep;
 
+/// A zero-based position in an exact finite script.
+#[repr(transparent)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct ScriptPosition(usize);
+
+impl ScriptPosition {
+    /// The first scripted request.
+    pub const ORIGIN: Self = Self(0);
+
+    /// Creates a position from its index.
+    #[must_use]
+    pub const fn new(index: usize) -> Self {
+        Self(index)
+    }
+
+    /// Returns the zero-based index.
+    #[must_use]
+    pub const fn get(self) -> usize {
+        self.0
+    }
+}
+
 /// Why an exact finite script rejected its supplied steps.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ScriptBuildFailure {
@@ -98,16 +120,34 @@ impl<Q: fmt::Debug, R: fmt::Debug> core::error::Error for ScriptBuildError<Q, R>
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ScriptFailure {
     /// No scripted request remains.
-    Exhausted,
+    Exhausted {
+        /// Position where the unexpected request arrived.
+        position: ScriptPosition,
+    },
     /// The request does not equal the next expected value.
-    Mismatch,
+    Mismatch {
+        /// Position of the unequal request.
+        position: ScriptPosition,
+    },
+}
+
+impl ScriptFailure {
+    /// Returns the exact failure position.
+    #[must_use]
+    pub const fn position(self) -> ScriptPosition {
+        match self {
+            Self::Exhausted { position } | Self::Mismatch { position } => position,
+        }
+    }
 }
 
 impl fmt::Display for ScriptFailure {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Exhausted => formatter.write_str("script is exhausted"),
-            Self::Mismatch => formatter.write_str("request does not match the next script step"),
+            Self::Exhausted { .. } => formatter.write_str("script is exhausted"),
+            Self::Mismatch { .. } => {
+                formatter.write_str("request does not match the next script step")
+            }
         }
     }
 }

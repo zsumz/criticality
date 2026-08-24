@@ -142,7 +142,7 @@ evidence = [
 
 [[invariant]]
 id = "SCRIPT-MATCH-01"
-title = "Exact script mismatch is non-consuming and exhaustion is explicit"
+title = "Exact script mismatch is non-consuming and failures report positions"
 status = "enforced"
 document = "README.md#plans-and-scripts"
 evidence = [

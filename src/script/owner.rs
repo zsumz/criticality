@@ -7,12 +7,15 @@ use crate::{
     retained::{Retained, RetainedBytes},
 };
 
-use super::{ScriptBuildError, ScriptBuildFailure, ScriptFailure, ScriptLimits, ScriptStep};
+use super::{
+    ScriptBuildError, ScriptBuildFailure, ScriptFailure, ScriptLimits, ScriptPosition, ScriptStep,
+};
 
 /// Count- and byte-bounded exact finite capability script.
 #[derive(Clone, Debug)]
 pub struct ExactScript<Q, R> {
     limits: ScriptLimits,
+    position: ScriptPosition,
     retained: RetainedBytes,
     steps: VecDeque<MeasuredStep<Q, R>>,
 }
@@ -92,6 +95,7 @@ impl<Q, R> ExactScript<Q, R> {
             .collect();
         Ok(Self {
             limits,
+            position: ScriptPosition::ORIGIN,
             retained,
             steps: measured,
         })
@@ -121,6 +125,12 @@ impl<Q, R> ExactScript<Q, R> {
         self.retained
     }
 
+    /// Returns the position of the next scripted request.
+    #[must_use]
+    pub const fn position(&self) -> ScriptPosition {
+        self.position
+    }
+
     /// Borrows the next exact expected request without consuming it.
     #[must_use]
     pub fn expected(&self) -> Option<&Q> {
@@ -135,20 +145,23 @@ impl<Q: PartialEq, R> ExactScript<Q, R> {
     ///
     /// Returns [`ScriptFailure::Exhausted`] when no step remains and
     /// [`ScriptFailure::Mismatch`] without consuming the next step otherwise.
+    /// Both failures identify the exact request position.
     pub fn respond(&mut self, request: &Q) -> Result<Plan<R>, ScriptFailure> {
+        let position = self.position;
         let Some(next) = self.steps.front() else {
-            return Err(ScriptFailure::Exhausted);
+            return Err(ScriptFailure::Exhausted { position });
         };
         if next.step.expected() != request {
-            return Err(ScriptFailure::Mismatch);
+            return Err(ScriptFailure::Mismatch { position });
         }
         let Some(retained) = self.retained.checked_sub(next.retained) else {
-            return Err(ScriptFailure::Exhausted);
+            return Err(ScriptFailure::Exhausted { position });
         };
         let Some(measured) = self.steps.pop_front() else {
-            return Err(ScriptFailure::Exhausted);
+            return Err(ScriptFailure::Exhausted { position });
         };
         self.retained = retained;
+        self.position = ScriptPosition::new(position.get() + 1);
         let (_, response) = measured.step.into_parts();
         Ok(response)
     }

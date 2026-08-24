@@ -5,7 +5,7 @@ use std::vec::Vec;
 use criticality::{
     plan::{Plan, Planned},
     retained::{Retained, RetainedBytes},
-    script::{ExactScript, ScriptFailure, ScriptLimits, ScriptStep},
+    script::{ExactScript, ScriptFailure, ScriptLimits, ScriptPosition, ScriptStep},
     time::Span,
 };
 
@@ -33,10 +33,17 @@ fn mismatch_is_non_consuming_and_exhaustion_is_explicit() {
         return;
     };
     assert!(script.len() == 1);
+    assert!(script.position() == ScriptPosition::ORIGIN);
     assert!(script.expected() == Some(&value(1, 2)));
     assert!(script.retained_bytes() == RetainedBytes::new(6));
 
-    assert!(script.respond(&value(9, 0)) == Err(ScriptFailure::Mismatch));
+    assert!(
+        script.respond(&value(9, 0))
+            == Err(ScriptFailure::Mismatch {
+                position: ScriptPosition::ORIGIN,
+            })
+    );
+    assert!(script.position() == ScriptPosition::ORIGIN);
     assert!(script.len() == 1);
     assert!(script.retained_bytes() == RetainedBytes::new(6));
 
@@ -47,8 +54,14 @@ fn mismatch_is_non_consuming_and_exhaustion_is_explicit() {
     };
     assert!(response.into_outcomes() == [Planned::new(Span::from_ticks(3), value(2, 4))]);
     assert!(script.is_empty());
+    assert!(script.position() == ScriptPosition::new(1));
     assert!(script.retained_bytes() == RetainedBytes::ZERO);
-    assert!(script.respond(&value(1, 2)) == Err(ScriptFailure::Exhausted));
+    assert!(
+        script.respond(&value(1, 2))
+            == Err(ScriptFailure::Exhausted {
+                position: ScriptPosition::new(1),
+            })
+    );
 }
 
 #[test]
