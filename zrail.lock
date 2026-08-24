@@ -2,7 +2,7 @@
 schema = 1
 semantics = 2
 producer = "0.0.2"
-contract_sha256 = "b5391692200f373d3625acdced942c519101663bd2ebd2a45c232ff0550f9001"
+contract_sha256 = "1709a145ff00b53632444e524d3307b2095afa968c01ceda1c19cc29a1d6fb52"
 ratchet = []
 
 [[package]]

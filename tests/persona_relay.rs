@@ -62,7 +62,7 @@ fn overflowing_plan() -> Plan<Packet> {
     ]))
 }
 
-fn apply_plan_atomically(
+fn apply_plan_with_rollback(
     timeline: &mut Timeline<Packet, Phase>,
     plan: Plan<Packet>,
 ) -> Result<Vec<EventToken<Phase>>, ApplyFailure> {
@@ -100,6 +100,8 @@ fn apply_plan_atomically(
                 let failure = error.failure();
                 let rejected = error.into_event();
                 let mut restored = Vec::with_capacity(admitted.len() + 1 + outcomes.len());
+                // Event identities are monotonic allocations and are not rewound by
+                // cancellation; rollback restores event ownership and the pending set.
                 for (token, admitted_delay) in admitted {
                     let cancelled = timeline.cancel(token);
                     assert!(
@@ -143,7 +145,7 @@ fn relay_composes_script_plan_timeline_trace_and_replay() {
         TimelineId::new(4),
         TimelineLimits::new(3, RetainedBytes::ZERO),
     );
-    let applied = apply_plan_atomically(&mut timeline, plan);
+    let applied = apply_plan_with_rollback(&mut timeline, plan);
     assert!(applied.is_ok());
     let Ok(tokens) = applied else {
         return;
@@ -170,7 +172,7 @@ fn relay_preflights_count_without_mutation() {
         TimelineLimits::new(2, RetainedBytes::ZERO),
     );
     let before = timeline.snapshot();
-    let result = apply_plan_atomically(&mut timeline, plan);
+    let result = apply_plan_with_rollback(&mut timeline, plan);
     let Err(failure) = result else {
         return;
     };
@@ -188,7 +190,7 @@ fn relay_preserves_atomic_multi_outcome_admission() {
         TimelineLimits::new(3, RetainedBytes::ZERO),
     );
     let before = full_time.snapshot();
-    let result = apply_plan_atomically(&mut full_time, plan);
+    let result = apply_plan_with_rollback(&mut full_time, plan);
     let Err(failure) = result else {
         return;
     };
@@ -204,7 +206,7 @@ fn relay_preserves_atomic_multi_outcome_admission() {
 }
 
 #[test]
-fn relay_rolls_back_an_unexpected_later_failure() {
+fn relay_rolls_back_all_outcomes_after_late_failure() {
     let plan = Plan::new(Vec::from([
         Planned::new(Span::ZERO, packet(1)),
         Planned::new(Span::ZERO, packet(2)),
@@ -216,7 +218,7 @@ fn relay_rolls_back_an_unexpected_later_failure() {
         measure_packet_two,
     );
     let before = timeline.snapshot();
-    let result = apply_plan_atomically(&mut timeline, plan);
+    let result = apply_plan_with_rollback(&mut timeline, plan);
     let Err(failure) = result else {
         return;
     };

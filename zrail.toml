@@ -231,7 +231,7 @@ evidence = [
   "rust-test:tests/persona_relay.rs::relay_composes_script_plan_timeline_trace_and_replay",
   "rust-test:tests/persona_relay.rs::relay_preflights_count_without_mutation",
   "rust-test:tests/persona_relay.rs::relay_preserves_atomic_multi_outcome_admission",
-  "rust-test:tests/persona_relay.rs::relay_rolls_back_an_unexpected_later_failure",
+  "rust-test:tests/persona_relay.rs::relay_rolls_back_all_outcomes_after_late_failure",
   "rust-test:tests/persona_watchdog.rs::watchdog_owns_heartbeat_deadline_and_expiration_policy",
   "gate:check",
   "gate:ci",
