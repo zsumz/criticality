@@ -72,6 +72,15 @@ scenario's decisions.
 reports the first divergence, exhaustion, and remaining records. A trace can
 lend its already-bounded records directly to replay without duplicating them.
 
+### Consumer evidence
+
+Public persona tests preserve retrying-client, dispatcher, outbox, relay, and
+watchdog consumers. Each owns its state, transition policy, effects, and run
+loop while composing Criticality's neutral mechanisms. Applying a multi-outcome
+`Plan` is consumer-owned: consumers choose partial admission, preflight known
+limits, or roll back admitted events with tokens. Criticality does not impose a
+batch policy before repeated consumers demonstrate the same requirement.
+
 ## Start
 
 ```toml

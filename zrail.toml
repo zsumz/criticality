@@ -214,6 +214,22 @@ evidence = [
   "gate:ci",
 ]
 
+[[invariant]]
+id = "PERSONA-COMPOSITION-01"
+title = "Independent consumers compose neutral mechanisms and own policy"
+status = "enforced"
+document = "README.md#consumer-evidence"
+evidence = [
+  "rust-test:tests/persona_retrying_client.rs::retrying_client_owns_retry_policy_and_run_loop",
+  "rust-test:tests/persona_dispatcher.rs::dispatcher_owns_transition_effects_and_phase_policy",
+  "rust-test:tests/persona_outbox.rs::outbox_owns_supersession_and_publication_state",
+  "rust-test:tests/persona_relay.rs::relay_composes_script_plan_timeline_trace_and_replay",
+  "rust-test:tests/persona_relay.rs::relay_preflights_atomic_multi_outcome_admission",
+  "rust-test:tests/persona_watchdog.rs::watchdog_owns_heartbeat_deadline_and_expiration_policy",
+  "gate:check",
+  "gate:ci",
+]
+
 [dependencies]
 mode = "locked"
 unassigned_packages = "deny"
