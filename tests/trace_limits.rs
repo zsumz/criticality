@@ -25,7 +25,7 @@ impl Retained for Record {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 struct MeasuredRecord {
     id: u8,
     bytes: ByteCount,
@@ -84,45 +84,10 @@ fn retained_measurement_occurs_once_and_snapshot_is_exact() {
 }
 
 #[test]
-fn cloning_trace_preserves_an_independent_aggregate_budget() {
-    let limits = TraceLimits::new(3, ByteCount::new(5));
-    let mut trace = Trace::with_measure(limits, measure_record);
-    assert!(trace.try_push(MeasuredRecord::new(1, 3)).is_ok());
-
-    let mut cloned = trace.clone();
-    assert!(cloned.retained_bytes() == ByteCount::new(3));
-    assert!(cloned.as_slice()[0].measurements.get() == 1);
-    assert!(cloned.try_push(MeasuredRecord::new(2, 2)).is_ok());
-    let rejected = cloned.try_push(MeasuredRecord::new(3, 1));
-    assert!(rejected.is_err());
-    let Err(error) = rejected else {
-        return;
-    };
-    assert!(is_byte_capacity(error.failure()));
-    let rejected = error.into_record();
-    assert!(rejected.id == 3);
-    assert!(rejected.measurements.get() == 1);
-
-    assert!(trace.try_push(MeasuredRecord::new(4, 2)).is_ok());
-
-    assert!(trace.len() == 2);
-    assert!(trace.retained_bytes() == ByteCount::new(5));
-    assert!(cloned.len() == 2);
-    assert!(cloned.retained_bytes() == ByteCount::new(5));
-    assert!(trace.as_slice()[0].measurements.get() == 1);
-    assert!(cloned.as_slice()[0].measurements.get() == 1);
-    assert!(trace.as_slice()[1].measurements.get() == 1);
-    assert!(cloned.as_slice()[1].measurements.get() == 1);
-}
-
-#[test]
 fn retained_byte_overflow_is_distinct_and_non_mutating() {
     let limits = TraceLimits::new(2, ByteCount::MAX);
     let mut trace = Trace::new(limits);
     assert!(trace.try_push(Record::new(1, u64::MAX)).is_ok());
-    let cloned = trace.clone();
-    assert!(cloned.len() == 1);
-    assert!(cloned.retained_bytes() == ByteCount::MAX);
     let result = trace.try_push(Record::new(2, 1));
     assert!(result.is_err());
     let Err(error) = result else {

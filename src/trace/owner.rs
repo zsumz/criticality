@@ -6,30 +6,21 @@ use bytebudget::{ByteBudget, ByteCount, Retained};
 use super::{ExactReplay, TraceError, TraceFailure, TraceLimits};
 
 /// A bounded, append-only typed trace.
+///
+/// Charge-bearing owners are deliberately not cloneable. Cloned records are
+/// new admissions and can retain a different number of bytes.
+///
+/// ```compile_fail
+/// use criticality::trace::Trace;
+/// fn require_clone<T: Clone>() {}
+/// require_clone::<Trace<()>>();
+/// ```
 #[derive(Debug)]
 pub struct Trace<T> {
     limits: TraceLimits,
     measure: fn(&T) -> ByteCount,
     budget: ByteBudget,
     records: Vec<T>,
-}
-
-impl<T: Clone> Clone for Trace<T> {
-    fn clone(&self) -> Self {
-        let mut budget = ByteBudget::new(self.budget.limit());
-        // Reconstruct the exact aggregate without making live budgets cloneable.
-        let reservation = budget.try_reserve(self.budget.used());
-        assert!(
-            reservation.is_ok(),
-            "bytebudget invariant was violated while cloning a trace"
-        );
-        Self {
-            limits: self.limits,
-            measure: self.measure,
-            budget,
-            records: self.records.clone(),
-        }
-    }
 }
 
 impl<T: Retained> Trace<T> {

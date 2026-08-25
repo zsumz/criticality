@@ -201,7 +201,6 @@ evidence = [
   "rust-test:tests/trace_limits.rs::count_and_byte_rejections_preserve_record_ownership",
   "rust-test:tests/trace_limits.rs::retained_measurement_occurs_once_and_snapshot_is_exact",
   "rust-test:tests/trace_limits.rs::retained_byte_overflow_is_distinct_and_non_mutating",
-  "rust-test:tests/trace_limits.rs::cloning_trace_preserves_an_independent_aggregate_budget",
   "gate:check",
   "gate:ci",
 ]
@@ -291,7 +290,7 @@ reason = "Time and byte values use Rust's built-in partial ordering derive."
 
 [[source.rust.macros.allow]]
 name = "assert"
-reason = "Tests and infallible budget reconstruction assert reviewed invariants."
+reason = "Tests use Rust's standard assertion expansion."
 
 [[source.rust.macros.allow]]
 name = "assert_eq"

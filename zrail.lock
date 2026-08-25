@@ -2,7 +2,7 @@
 schema = 1
 semantics = 2
 producer = "0.0.2"
-contract_sha256 = "3af5aade03fc64d70e05bfddc5b0c2aee72bcad4c7525b509203ebc282e244e1"
+contract_sha256 = "fa92209445a17fe0b5547c265007cbff9f444dd29855995f1fa50089b61c17c4"
 ratchet = []
 
 [[package]]
@@ -14,7 +14,7 @@ name = "bytebudget"
 kind = "normal"
 scope = "external"
 optional = false
-default_features = true
+default_features = false
 
 [package.dependency.source]
 kind = "registry"
@@ -52,11 +52,11 @@ sha256 = "26aace1d8dff53ed38c312885d6ee3a0c25d5a6ee6ef7febdbe3b136a2b5d714"
 
 [[gate.input]]
 path = "Cargo.toml"
-sha256 = "3c65fc6e255af6529d90b379489c5e75daff27cace9a8144b27e16ef695c3c4f"
+sha256 = "e7bd5ea40d8c76de716c99050228905992152a4e766c6577d43b375229117dd8"
 
 [[gate.input]]
 path = "README.md"
-sha256 = "d8b3aa9c7dd4db47d46444c1913a682810c27a3b33017cb1c2129016d95ddebe"
+sha256 = "2245bcb3283f19e5753caef3a91137d7a441f7359440f1839a37356cfc4687df"
 
 [[gate.input]]
 path = "clippy.toml"
@@ -93,7 +93,7 @@ sha256 = "a2b150d0fc4b9d94d37e8df5d9fcdc29d07fdc7a26a763192a2a0da1a04171c4"
 [[gate]]
 name = "ci"
 path = ".github/workflows/ci.yml"
-sha256 = "0ade285d32261cdf86e2c11bfffdb10632ac8bf6818b5e3c6de0f580cacc6972"
+sha256 = "77a1c0fbee85646358a2f24c517fc98f76de8363f48d77d388c29c79ecdc6e5d"
 
 [[gate.input]]
 path = ".github/actions/setup-rust/action.yml"

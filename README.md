@@ -44,6 +44,9 @@ transitions, and every replay divergence identifies the first unmatched position
 time domain. bytebudget's `ByteCount` and `Retained` make variable memory part
 of admission instead of an implicit property of a container.
 
+Charge-bearing owners deliberately do not implement `Clone`: a cloned value is
+a new admission whose retained storage must be measured independently.
+
 ### Timeline
 
 `Timeline` orders owned events by virtual moment, finite consumer-defined phase,
@@ -72,9 +75,8 @@ scenario's decisions.
 `ExactReplay` borrows finite expected evidence, advances only on equality, and
 reports the first divergence, exhaustion, and remaining records. A trace can
 lend its already-bounded records directly to replay without duplicating them.
-`Trace` stores its live aggregate in `ByteBudget`; cloning a trace reconstructs
-an independent budget at the same exact use instead of weakening bytebudget's
-non-cloneable live-budget contract.
+
+`Trace` stores its live aggregate in bytebudget's non-cloneable `ByteBudget`.
 
 ### Consumer evidence
 
@@ -89,7 +91,7 @@ batch policy before repeated consumers demonstrate the same requirement.
 
 ```toml
 [dependencies]
-bytebudget = "=0.0.1-rc.1"
+bytebudget = { version = "=0.0.1-rc.1", default-features = false }
 criticality = "=0.0.1-rc.3"
 ```
 
@@ -121,6 +123,7 @@ assert_eq!(timeline.pop_next().map(|item| item.into_event()), Some("retry"));
 
 ```sh
 cargo +1.96.1 install zcheck --version 0.0.1 --locked
+cargo fetch --locked
 zcheck
 ```
 

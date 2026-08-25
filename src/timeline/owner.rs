@@ -11,7 +11,7 @@ mod schedule;
 
 type EventKey<P> = (Moment, P, EventId);
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 struct Entry<E> {
     event: E,
     retained: ByteCount,
@@ -27,7 +27,16 @@ struct Entry<E> {
 ///
 /// let _: Option<Timeline<(), String>> = None;
 /// ```
-#[derive(Clone, Debug)]
+///
+/// Charge-bearing owners are deliberately not cloneable. Cloned events are
+/// new admissions and can retain a different number of bytes.
+///
+/// ```compile_fail
+/// use criticality::timeline::Timeline;
+/// fn require_clone<T: Clone>() {}
+/// require_clone::<Timeline<()>>();
+/// ```
+#[derive(Debug)]
 pub struct Timeline<E, P: Copy + Ord = ()> {
     id: TimelineId,
     clock: VirtualClock,

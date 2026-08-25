@@ -10,7 +10,16 @@ use super::{
 };
 
 /// Count- and byte-bounded exact finite capability script.
-#[derive(Clone, Debug)]
+///
+/// Charge-bearing owners are deliberately not cloneable. Cloned requests and
+/// responses are new admissions and can retain different numbers of bytes.
+///
+/// ```compile_fail
+/// use criticality::script::ExactScript;
+/// fn require_clone<T: Clone>() {}
+/// require_clone::<ExactScript<(), ()>>();
+/// ```
+#[derive(Debug)]
 pub struct ExactScript<Q, R> {
     limits: ScriptLimits,
     position: ScriptPosition,
@@ -169,7 +178,7 @@ impl<Q: PartialEq, R> ExactScript<Q, R> {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 struct MeasuredStep<Q, R> {
     step: ScriptStep<Q, R>,
     retained: ByteCount,

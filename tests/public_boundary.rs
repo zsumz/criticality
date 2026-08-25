@@ -11,7 +11,9 @@ fn core_manifest_and_facade_use_one_locked_no_std_dependency() {
         .skip(1)
         .take_while(|line| !line.starts_with('['))
         .filter(|line| !line.is_empty());
-    assert!(dependencies.eq(["bytebudget = \"=0.0.1-rc.1\""]));
+    assert!(
+        dependencies.eq(["bytebudget = { version = \"=0.0.1-rc.1\", default-features = false }"])
+    );
     assert!(FACADE.contains("#![no_std]"));
     assert!(FACADE.contains("#![forbid(unsafe_code)]"));
 

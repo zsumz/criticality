@@ -19,7 +19,7 @@ include = [
 ]
 
 [dependencies]
-bytebudget = "=0.0.1-rc.1"
+bytebudget = { version = "=0.0.1-rc.1", default-features = false }
 
 [lints.rust]
 missing_debug_implementations = "warn"

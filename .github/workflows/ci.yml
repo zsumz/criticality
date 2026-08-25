@@ -37,6 +37,8 @@ jobs:
         uses: ./.github/actions/setup-zrail
       - name: Install zcheck
         run: cargo +1.96.1 install zcheck --version 0.0.1 --locked
+      - name: Fetch locked dependency graph
+        run: cargo fetch --locked
       - name: Run canonical zcheck qualification
         env:
           ZCHECK_CACHE_DIR: ${{ runner.temp }}/zcheck
