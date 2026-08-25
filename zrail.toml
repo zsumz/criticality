@@ -25,6 +25,8 @@ inputs = [
   "Cargo.toml",
   "Cargo.lock",
   "README.md",
+  "docs/concepts.md",
+  "docs/qualification.md",
   "criticality-logo.svg",
   "src/lib.rs",
 ]
@@ -60,9 +62,9 @@ evidence = [
 
 [[invariant]]
 id = "LAYOUT-01"
-title = "The repository remains a single crate with one README"
+title = "The repository remains a single crate with a concise documentation front door"
 status = "enforced"
-document = "README.md#qualification"
+document = "docs/qualification.md#repository-shape"
 evidence = [
   "rust-test:tests/public_boundary.rs::package_identity_is_explicit",
   "gate:check",
@@ -74,7 +76,7 @@ evidence = [
 id = "TIME-01"
 title = "Virtual time is fixed-width, monotonic, and checked"
 status = "enforced"
-document = "README.md#time-and-retention"
+document = "docs/concepts.md#time-and-retention"
 evidence = [
   "rust-test:tests/time.rs::virtual_time_never_moves_backward",
   "rust-test:tests/time.rs::virtual_time_overflow_preserves_the_clock",
@@ -86,7 +88,7 @@ evidence = [
 id = "RETAINED-01"
 title = "Byte counts, conversions, and retained measurement are explicit and checked"
 status = "enforced"
-document = "README.md#time-and-retention"
+document = "docs/concepts.md#time-and-retention"
 evidence = [
   "rust-test:tests/retained.rs::byte_count_uses_checked_fixed_width_accounting",
   "rust-test:tests/retained.rs::byte_count_accepts_lossless_integer_conversions",
@@ -99,7 +101,7 @@ evidence = [
 id = "TIMELINE-ORDER-01"
 title = "Timeline delivery is ordered by moment, consumer phase, and event identity"
 status = "enforced"
-document = "README.md#timeline"
+document = "docs/concepts.md#timeline"
 evidence = [
   "rust-test:tests/timeline_ordering.rs::timeline_orders_by_moment_phase_and_insertion_identity",
   "gate:check",
@@ -110,7 +112,7 @@ evidence = [
 id = "TIMELINE-ADMISSION-01"
 title = "Timeline admission is bounded and preserves rejected event ownership"
 status = "enforced"
-document = "README.md#timeline"
+document = "docs/concepts.md#timeline"
 evidence = [
   "rust-test:tests/timeline_limits.rs::count_and_byte_rejections_preserve_event_ownership",
   "rust-test:tests/timeline_limits.rs::overflow_and_past_rejections_leave_timeline_unchanged",
@@ -122,7 +124,7 @@ evidence = [
 id = "TIMELINE-CANCEL-01"
 title = "Cancellation is exact, timeline-scoped, and returns event ownership"
 status = "enforced"
-document = "README.md#timeline"
+document = "docs/concepts.md#timeline"
 evidence = [
   "rust-test:tests/timeline_cancellation.rs::cancellation_returns_ownership_and_releases_accounting",
   "rust-test:tests/timeline_cancellation.rs::foreign_tokens_cannot_cancel_local_events",
@@ -135,7 +137,7 @@ evidence = [
 id = "PLAN-01"
 title = "Finite plans preserve exact delayed-outcome order and ownership"
 status = "enforced"
-document = "README.md#plans-and-scripts"
+document = "docs/concepts.md#plans-and-scripts"
 evidence = [
   "rust-test:tests/plan.rs::finite_plans_preserve_exact_order_and_cardinality",
   "rust-test:tests/timeline_planned.rs::planned_outcomes_schedule_with_owned_delay_and_phase",
@@ -147,7 +149,7 @@ evidence = [
 id = "SCRIPT-MATCH-01"
 title = "Exact script mismatch is non-consuming and failures report positions"
 status = "enforced"
-document = "README.md#plans-and-scripts"
+document = "docs/concepts.md#plans-and-scripts"
 evidence = [
   "rust-test:tests/script_matching.rs::mismatch_is_non_consuming_and_exhaustion_is_explicit",
   "gate:check",
@@ -158,7 +160,7 @@ evidence = [
 id = "SCRIPT-ADMISSION-01"
 title = "Exact script admission is count and byte bounded and preserves ownership"
 status = "enforced"
-document = "README.md#plans-and-scripts"
+document = "docs/concepts.md#plans-and-scripts"
 evidence = [
   "rust-test:tests/script_limits.rs::step_and_outcome_limits_preserve_all_supplied_steps",
   "rust-test:tests/script_limits.rs::byte_capacity_and_overflow_are_distinct_and_ownership_preserving",
@@ -170,7 +172,7 @@ evidence = [
 id = "ENTROPY-STREAM-01"
 title = "Entropy output is versioned, portable, explicit, and stream-isolated"
 status = "enforced"
-document = "README.md#entropy"
+document = "docs/concepts.md#entropy"
 evidence = [
   "rust-test:tests/entropy.rs::splitmix64_has_portable_versioned_vectors",
   "rust-test:tests/entropy.rs::independent_streams_are_stable_under_unrelated_draws",
@@ -182,7 +184,7 @@ evidence = [
 id = "ENTROPY-INDEX-01"
 title = "Bounded-index selection is versioned, unbiased, and rejects empty domains"
 status = "enforced"
-document = "README.md#entropy"
+document = "docs/concepts.md#entropy"
 evidence = [
   "rust-test:tests/entropy.rs::bounded_index_mapping_has_portable_versioned_vectors",
   "rust-test:tests/entropy.rs::empty_bound_is_explicit_and_does_not_consume_entropy",
@@ -196,7 +198,7 @@ evidence = [
 id = "TRACE-ADMISSION-01"
 title = "Trace admission is bounded, measured once, and ownership preserving"
 status = "enforced"
-document = "README.md#traces-and-replay"
+document = "docs/concepts.md#traces-and-replay"
 evidence = [
   "rust-test:tests/trace_limits.rs::count_and_byte_rejections_preserve_record_ownership",
   "rust-test:tests/trace_limits.rs::retained_measurement_occurs_once_and_snapshot_is_exact",
@@ -209,7 +211,7 @@ evidence = [
 id = "REPLAY-EXACT-01"
 title = "Exact replay advances only on equality and reports first divergence"
 status = "enforced"
-document = "README.md#traces-and-replay"
+document = "docs/concepts.md#traces-and-replay"
 evidence = [
   "rust-test:tests/replay.rs::exact_equality_advances_one_record_at_a_time",
   "rust-test:tests/replay.rs::mismatch_reports_first_position_without_consuming",
@@ -223,7 +225,7 @@ evidence = [
 id = "PERSONA-COMPOSITION-01"
 title = "Independent consumers compose neutral mechanisms and own policy"
 status = "enforced"
-document = "README.md#consumer-evidence"
+document = "docs/concepts.md#consumer-composition"
 evidence = [
   "rust-test:tests/persona_retrying_client.rs::retrying_client_owns_retry_policy_and_run_loop",
   "rust-test:tests/persona_dispatcher.rs::dispatcher_owns_transition_effects_and_phase_policy",

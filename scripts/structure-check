@@ -15,7 +15,7 @@ if [[ ! -f "$repo_root/zcheck.toml" ]]; then
     status=1
 fi
 
-for removed in crates docs reference; do
+for removed in crates reference; do
     if [[ -e "$repo_root/$removed" || -L "$repo_root/$removed" ]]; then
         echo "error: single-crate repository may not contain $removed/" >&2
         status=1
@@ -23,11 +23,17 @@ for removed in crates docs reference; do
 done
 
 while IFS= read -r markdown; do
-    if [[ "$markdown" != "README.md" ]]; then
-        echo "error: README.md is the only tracked Markdown document: $markdown" >&2
-        status=1
-    fi
-done < <(git -C "$repo_root" ls-files '*.md' | LC_ALL=C sort)
+    case "$markdown" in
+        README.md | docs/concepts.md | docs/qualification.md) ;;
+        *)
+            echo "error: Markdown document is outside the reviewed set: $markdown" >&2
+            status=1
+            ;;
+    esac
+done < <(
+    git -C "$repo_root" ls-files --cached --others --exclude-standard '*.md' \
+        | LC_ALL=C sort
+)
 
 while IFS= read -r source; do
     lines="$(wc -l < "$source" | tr -d ' ')"

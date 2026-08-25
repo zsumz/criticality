@@ -7,86 +7,29 @@
 </p>
 
 <p align="center">
-  Criticality provides explicit virtual time, event ordering, finite plans,
-  exact scripts, deterministic entropy, and replay without owning your model
-  or runtime.
+  Explicit virtual time, event ordering, finite plans, exact scripts,
+  deterministic entropy, and replay—without owning your model or runtime.
 </p>
 
 <p align="center">
   <a href="#model">Model</a>
   <span> · </span>
-  <a href="#primitives">Primitives</a>
-  <span> · </span>
   <a href="#start">Start</a>
   <span> · </span>
-  <a href="#qualification">Qualification</a>
+  <a href="#primitives">Primitives</a>
   <span> · </span>
   <a href="#scope">Scope</a>
 </p>
 
 ## Model
 
-Criticality is a `no_std + alloc` library built on exact, dependency-free
-byte-accounting primitives. It gives a state machine deterministic mechanisms
-while leaving domain events, transitions, effects, scheduling policy, fairness,
-and failure policy with the consumer.
+Criticality is a `no_std + alloc` library of deterministic mechanisms. Your
+application keeps ownership of domain events, transitions, effects, scheduling
+policy, fairness, and failure policy.
 
-Every incrementally admitting container has explicit count and retained-byte
-limits. Finite values such as plans remain bounded by their consumer. Rejected
-values return to the caller. Time advances only through checked virtual
-transitions, and every replay divergence identifies the first unmatched position.
-
-## Primitives
-
-### Time and retention
-
-`Moment`, `Span`, `Deadline`, and `VirtualClock` define a fixed-width virtual
-time domain. `ByteCount` and `Retained` make variable memory part of admission
-instead of an implicit property of a container.
-
-Charge-bearing owners deliberately do not implement `Clone`: a cloned value is
-a new admission whose retained storage must be measured independently.
-
-### Timeline
-
-`Timeline` orders owned events by virtual moment, finite consumer-defined phase,
-and stable insertion identity. Phases must be `Copy + Ord`; variable retained
-data belongs in the measured event. Scheduling and cancellation are bounded,
-timeline-scoped, and ownership-preserving. A `TimelineId` names one incarnation
-and must not be reused while capabilities from an earlier incarnation may exist;
-`Timeline::empty_at` creates a new empty timeline rather than restoring one.
-
-### Plans and scripts
-
-`Plan` describes a finite, consumer-bounded ordered set of delayed outcomes.
-`ExactScript` matches requests without consuming mismatches, reports exhaustion
-and mismatches at their exact positions, and bounds both step count and retained
-bytes.
-
-### Entropy
-
-`SplitMix64` provides portable versioned streams and unbiased bounded-index
-selection. Independent stream identities keep unrelated draws from changing a
-scenario's decisions.
-
-### Traces and replay
-
-`Trace` records typed observations behind count and retained-byte limits.
-`ExactReplay` borrows finite expected evidence, advances only on equality, and
-reports the first divergence, exhaustion, and remaining records. A trace can
-lend its already-bounded records directly to replay without duplicating them.
-
-`Trace` keeps exact live retained-byte accounting without exposing its
-accounting machinery.
-
-### Consumer evidence
-
-Public persona tests preserve retrying-client, dispatcher, outbox, relay, and
-watchdog consumers. Each owns its state, transition policy, effects, and run
-loop while composing Criticality's neutral mechanisms. Applying a multi-outcome
-`Plan` is consumer-owned: consumers choose partial admission, preflight known
-limits, or roll back admitted events with tokens. Criticality does not impose a
-batch policy before repeated consumers demonstrate the same requirement.
+Incrementally admitting containers have explicit count and retained-byte
+limits. Rejections preserve ownership, virtual-time transitions are checked,
+and replay reports the first divergence.
 
 ## Start
 
@@ -115,29 +58,31 @@ assert!(timeline.schedule_at(Moment::from_tick(3), "retry").is_ok());
 assert_eq!(timeline.pop_next().map(|item| item.into_event()), Some("retry"));
 ```
 
+Criticality re-exports `ByteCount` and `Retained`, so consumers only name
+`criticality`. Its internal byte-budget owner is not part of the facade.
+
+## Primitives
+
+- <a id="time-and-retention"></a>[Time and retention](https://github.com/zsumz/criticality/blob/main/docs/concepts.md#time-and-retention)
+- <a id="timeline"></a>[Timeline](https://github.com/zsumz/criticality/blob/main/docs/concepts.md#timeline)
+- <a id="plans-and-scripts"></a>[Plans and scripts](https://github.com/zsumz/criticality/blob/main/docs/concepts.md#plans-and-scripts)
+- <a id="entropy"></a>[Entropy](https://github.com/zsumz/criticality/blob/main/docs/concepts.md#entropy)
+- <a id="traces-and-replay"></a>[Traces and replay](https://github.com/zsumz/criticality/blob/main/docs/concepts.md#traces-and-replay)
+- <a id="consumer-evidence"></a>[Consumer composition](https://github.com/zsumz/criticality/blob/main/docs/concepts.md#consumer-composition)
+
 ## Qualification
 
-```sh
-cargo +1.96.1 install zcheck --version 0.0.1 --locked
-cargo fetch --locked
-zcheck
-```
+Run `zcheck` for the complete local gate. See
+[qualification](https://github.com/zsumz/criticality/blob/main/docs/qualification.md)
+for setup, package proof, and toolchain policy.
 
-The checked-in `zcheck.toml` is the complete qualification graph. It checks
-formatting, host and `thumbv7em-none-eabi` `no_std` library builds, Clippy,
-tests, rustdoc, the crate archive against `package-contents.txt`, source shape,
-zrail architecture, and clean diffs. There is no `scripts/check`; scripts
-contain implementation logic while declarative commands stay in the manifest.
-
-Criticality requires Rust 1.88 or newer. zcheck builds with Rust 1.96.1 or
-newer. `0.0.1-rc.3` is a release candidate.
+Criticality requires Rust 1.88 or newer. `0.0.1-rc.3` is a release candidate.
 
 ## Scope
 
-Criticality does not provide a state-machine framework, async runtime, general
-executor, model explorer, protocol vocabulary, or production run loop. It owns
-only reusable deterministic mechanisms whose limits and failure paths remain
-visible to the caller.
+Criticality is not a state-machine framework, async runtime, general executor,
+model explorer, protocol vocabulary, or production run loop. It owns only the
+reusable deterministic mechanisms whose limits and failures remain visible.
 
 ## License
 
