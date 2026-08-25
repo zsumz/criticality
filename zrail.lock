@@ -2,12 +2,23 @@
 schema = 1
 semantics = 2
 producer = "0.0.2"
-contract_sha256 = "1709a145ff00b53632444e524d3307b2095afa968c01ceda1c19cc29a1d6fb52"
+contract_sha256 = "3af5aade03fc64d70e05bfddc5b0c2aee72bcad4c7525b509203ebc282e244e1"
 ratchet = []
 
 [[package]]
 name = "criticality"
-dependency = []
+
+[[package.dependency]]
+alias = "bytebudget"
+name = "bytebudget"
+kind = "normal"
+scope = "external"
+optional = false
+default_features = true
+
+[package.dependency.source]
+kind = "registry"
+requirement = "=0.0.1-rc.1"
 
 [[gate]]
 name = "architecture-review"
@@ -25,7 +36,7 @@ sha256 = "278374ff43731777bc63b5d4945a6cafa620f8dc246761dff757d2a0905cf29d"
 [[gate]]
 name = "check"
 path = "zcheck.toml"
-sha256 = "70a225bbac06e0870e29dd180fa77987faf0d30ba56668cd2636f024847d11fa"
+sha256 = "37a35d353f5603f56bc1640d3898f4f324b28f53197aa9e59d25e7cf8b20edf6"
 
 [[gate.input]]
 path = ".gitattributes"
@@ -37,15 +48,15 @@ sha256 = "3a9b3edae61aeebcff5a2196c932facd67317f4127d272403c334386b134e6f9"
 
 [[gate.input]]
 path = "Cargo.lock"
-sha256 = "0ea28a92fec2b6166c7cfd085dde03770ddff28e380d700de814164d8460a404"
+sha256 = "26aace1d8dff53ed38c312885d6ee3a0c25d5a6ee6ef7febdbe3b136a2b5d714"
 
 [[gate.input]]
 path = "Cargo.toml"
-sha256 = "0d4c76e18bf6c8e6504a0f5b90b47d9e6965c7ba232bdca0fb6b9b554e245fde"
+sha256 = "3c65fc6e255af6529d90b379489c5e75daff27cace9a8144b27e16ef695c3c4f"
 
 [[gate.input]]
 path = "README.md"
-sha256 = "bf702ea0e84a9437bb54efa7955fe003852976404e0bf5d68c59bacfb302b2e2"
+sha256 = "d8b3aa9c7dd4db47d46444c1913a682810c27a3b33017cb1c2129016d95ddebe"
 
 [[gate.input]]
 path = "clippy.toml"
@@ -57,7 +68,7 @@ sha256 = "46f905f446be914dbafcba06c8f8172464cab67d0ba3caaa0a0186635b5afa18"
 
 [[gate.input]]
 path = "package-contents.txt"
-sha256 = "6315c09ee0370844ac6b67209673568a769b0d571cbb1abbd5e7e3e1d2ead893"
+sha256 = "c664af21cd5095fedad0cd67e72d28fc9a3b06238c0ee17dc847b4d5d2c6d9cb"
 
 [[gate.input]]
 path = "rust-toolchain.toml"
@@ -73,11 +84,11 @@ sha256 = "9c4699232aad66464ff6b17ffabebf8c4c2c393a4c55a8b6b36288a782e350e4"
 
 [[gate.input]]
 path = "scripts/structure-check"
-sha256 = "620c4d4b93ba3dfc7f91c01f5aece68374ac7c8b8224c75f9b534399409d68fd"
+sha256 = "f6a21055dd179bd432256382d5870bd9f14700e9d744f0602da0b2c4242b9885"
 
 [[gate.input]]
 path = "src/lib.rs"
-sha256 = "9a1b7fa6bbfda4300e8f52cda112fdf9fe62cc2fa371d8e6f47a14593672f667"
+sha256 = "a2b150d0fc4b9d94d37e8df5d9fcdc29d07fdc7a26a763192a2a0da1a04171c4"
 
 [[gate]]
 name = "ci"

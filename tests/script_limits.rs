@@ -2,25 +2,26 @@
 
 use std::vec::Vec;
 
+use bytebudget::{ByteCount, Retained};
+
 use criticality::{
     plan::{Plan, Planned},
-    retained::{Retained, RetainedBytes},
     script::{ExactScript, ScriptBuildFailure, ScriptLimits, ScriptStep},
     time::Span,
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-struct Value(RetainedBytes);
+struct Value(ByteCount);
 
 impl Retained for Value {
-    fn retained_bytes(&self) -> RetainedBytes {
+    fn retained_bytes(&self) -> ByteCount {
         self.0
     }
 }
 
 #[test]
 fn step_and_outcome_limits_preserve_all_supplied_steps() {
-    let step = ScriptStep::new(Value(RetainedBytes::ZERO), Plan::<Value>::empty());
+    let step = ScriptStep::new(Value(ByteCount::ZERO), Plan::<Value>::empty());
     let steps = Vec::from([step.clone()]);
     let result = ExactScript::try_new(limits(0, 0, 0), steps);
     assert!(result.is_err());
@@ -37,8 +38,8 @@ fn step_and_outcome_limits_preserve_all_supplied_steps() {
     assert!(error.into_steps() == [step]);
 
     let step = ScriptStep::new(
-        Value(RetainedBytes::ZERO),
-        Plan::single(Planned::new(Span::ZERO, Value(RetainedBytes::ZERO))),
+        Value(ByteCount::ZERO),
+        Plan::single(Planned::new(Span::ZERO, Value(ByteCount::ZERO))),
     );
     let result = ExactScript::try_new(limits(1, 0, 0), Vec::from([step.clone()]));
     assert!(result.is_err());
@@ -58,8 +59,8 @@ fn step_and_outcome_limits_preserve_all_supplied_steps() {
 #[test]
 fn byte_capacity_and_overflow_are_distinct_and_ownership_preserving() {
     let step = ScriptStep::new(
-        Value(RetainedBytes::new(2)),
-        Plan::single(Planned::new(Span::ZERO, Value(RetainedBytes::new(3)))),
+        Value(ByteCount::new(2)),
+        Plan::single(Planned::new(Span::ZERO, Value(ByteCount::new(3)))),
     );
     let result = ExactScript::try_new(limits(1, 1, 4), Vec::from([step.clone()]));
     assert!(result.is_err());
@@ -70,8 +71,8 @@ fn byte_capacity_and_overflow_are_distinct_and_ownership_preserving() {
     assert!(error.into_steps() == [step]);
 
     let step = ScriptStep::new(
-        Value(RetainedBytes::new(u64::MAX)),
-        Plan::single(Planned::new(Span::ZERO, Value(RetainedBytes::new(1)))),
+        Value(ByteCount::MAX),
+        Plan::single(Planned::new(Span::ZERO, Value(ByteCount::new(1)))),
     );
     let result = ExactScript::try_new(limits(1, 1, u64::MAX), Vec::from([step.clone()]));
     assert!(result.is_err());
@@ -83,7 +84,7 @@ fn byte_capacity_and_overflow_are_distinct_and_ownership_preserving() {
 }
 
 const fn limits(steps: usize, outcomes: usize, bytes: u64) -> ScriptLimits {
-    ScriptLimits::new(steps, outcomes, RetainedBytes::new(bytes))
+    ScriptLimits::new(steps, outcomes, ByteCount::new(bytes))
 }
 
 const fn is_byte_capacity(failure: ScriptBuildFailure) -> bool {

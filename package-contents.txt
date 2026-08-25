@@ -8,7 +8,6 @@ criticality-logo.svg
 src/entropy.rs
 src/lib.rs
 src/plan.rs
-src/retained.rs
 src/script.rs
 src/script/error.rs
 src/script/limits.rs

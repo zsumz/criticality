@@ -1,11 +1,9 @@
 //! Count- and byte-bounded deterministic event ownership.
 
 use alloc::collections::BTreeMap;
+use bytebudget::{ByteCount, Retained};
 
-use crate::{
-    retained::{Retained, RetainedBytes},
-    time::{Moment, VirtualClock},
-};
+use crate::time::{Moment, VirtualClock};
 
 use super::{Delivery, EventId, EventToken, TimelineId, TimelineLimits, TimelineSnapshot};
 
@@ -16,7 +14,7 @@ type EventKey<P> = (Moment, P, EventId);
 #[derive(Clone, Debug)]
 struct Entry<E> {
     event: E,
-    retained: RetainedBytes,
+    retained: ByteCount,
 }
 
 /// Bounded timeline ordered by moment, consumer phase, and insertion identity.
@@ -34,9 +32,9 @@ pub struct Timeline<E, P: Copy + Ord = ()> {
     id: TimelineId,
     clock: VirtualClock,
     limits: TimelineLimits,
-    measure: fn(&E) -> RetainedBytes,
+    measure: fn(&E) -> ByteCount,
     next_id: Option<EventId>,
-    retained: RetainedBytes,
+    retained: ByteCount,
     events: BTreeMap<EventKey<P>, Entry<E>>,
 }
 
@@ -56,22 +54,26 @@ impl<E: Retained, P: Copy + Ord> Timeline<E, P> {
 
 impl<E, P: Copy + Ord> Timeline<E, P> {
     /// Creates an origin timeline using an explicit event measurement function.
+    ///
+    /// `measure` must follow the same retained-storage model as [`Retained`].
     #[must_use]
     pub fn with_measure(
         id: TimelineId,
         limits: TimelineLimits,
-        measure: fn(&E) -> RetainedBytes,
+        measure: fn(&E) -> ByteCount,
     ) -> Self {
         Self::empty_at_with_measure(id, Moment::ORIGIN, limits, measure)
     }
 
     /// Creates an empty timeline at an explicit moment using an event measure.
+    ///
+    /// `measure` must follow the same retained-storage model as [`Retained`].
     #[must_use]
     pub fn empty_at_with_measure(
         id: TimelineId,
         now: Moment,
         limits: TimelineLimits,
-        measure: fn(&E) -> RetainedBytes,
+        measure: fn(&E) -> ByteCount,
     ) -> Self {
         Self {
             id,
@@ -79,7 +81,7 @@ impl<E, P: Copy + Ord> Timeline<E, P> {
             limits,
             measure,
             next_id: Some(EventId::new(0)),
-            retained: RetainedBytes::ZERO,
+            retained: ByteCount::ZERO,
             events: BTreeMap::new(),
         }
     }

@@ -42,6 +42,16 @@ if grep -R -F '#[cfg(test)]' "$repo_root/src" >/dev/null; then
     status=1
 fi
 
+if [[ -e "$repo_root/src/retained.rs" || -L "$repo_root/src/retained.rs" ]]; then
+    echo "error: bytebudget replaces the local src/retained.rs authority" >&2
+    status=1
+fi
+
+if grep -R -F 'RetainedBytes' "$repo_root/src" "$repo_root/README.md" >/dev/null; then
+    echo "error: bytebudget migration may not retain a RetainedBytes authority or alias" >&2
+    status=1
+fi
+
 for cargo_config in .cargo/config .cargo/config.toml; do
     if [[ -e "$repo_root/$cargo_config" || -L "$repo_root/$cargo_config" ]]; then
         echo "error: repository-local Cargo configuration is not permitted: $cargo_config" >&2

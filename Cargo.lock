@@ -3,5 +3,14 @@
 version = 4
 
 [[package]]
+name = "bytebudget"
+version = "0.0.1-rc.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0a333b10952faa5bba198eae85398341c643ed4bce31ae9efb3d8feb22979d25"
+
+[[package]]
 name = "criticality"
-version = "0.0.1-rc.2"
+version = "0.0.1-rc.3"
+dependencies = [
+ "bytebudget",
+]

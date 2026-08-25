@@ -1,7 +1,8 @@
 //! Dispatcher consumer composition with consumer-defined phases and effects.
 
+use bytebudget::{ByteCount, Retained};
+
 use criticality::{
-    retained::{Retained, RetainedBytes},
     time::Moment,
     timeline::{Timeline, TimelineId, TimelineLimits},
     trace::{Trace, TraceLimits},
@@ -20,8 +21,8 @@ enum Event {
 }
 
 impl Retained for Event {
-    fn retained_bytes(&self) -> RetainedBytes {
-        RetainedBytes::ZERO
+    fn retained_bytes(&self) -> ByteCount {
+        ByteCount::ZERO
     }
 }
 
@@ -32,8 +33,8 @@ enum Record {
 }
 
 impl Retained for Record {
-    fn retained_bytes(&self) -> RetainedBytes {
-        RetainedBytes::ZERO
+    fn retained_bytes(&self) -> ByteCount {
+        ByteCount::ZERO
     }
 }
 
@@ -47,11 +48,8 @@ struct Dispatcher {
 fn dispatcher_owns_transition_effects_and_phase_policy() {
     let at = Moment::from_tick(5);
     let mut machine = Dispatcher::default();
-    let mut timeline = Timeline::new(
-        TimelineId::new(2),
-        TimelineLimits::new(4, RetainedBytes::ZERO),
-    );
-    let mut trace = Trace::new(TraceLimits::new(4, RetainedBytes::ZERO));
+    let mut timeline = Timeline::new(TimelineId::new(2), TimelineLimits::new(4, ByteCount::ZERO));
+    let mut trace = Trace::new(TraceLimits::new(4, ByteCount::ZERO));
     assert!(
         timeline
             .schedule_at_in(at, Phase::External, Event::Dispatch(1))

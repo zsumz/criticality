@@ -1,9 +1,8 @@
 //! Ownership-preserving script construction and matching failures.
 
 use alloc::vec::Vec;
+use bytebudget::ByteCount;
 use core::fmt;
-
-use crate::retained::RetainedBytes;
 
 use super::ScriptStep;
 
@@ -53,9 +52,9 @@ pub enum ScriptBuildFailure {
     /// The script exceeds its variable retained-byte limit.
     RetainedByteCapacity {
         /// Configured retained-byte limit.
-        limit: RetainedBytes,
+        limit: ByteCount,
         /// Bytes retained by the supplied script.
-        actual: RetainedBytes,
+        actual: ByteCount,
     },
 }
 

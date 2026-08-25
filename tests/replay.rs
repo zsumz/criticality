@@ -1,9 +1,8 @@
 //! Public exact replay position and first-divergence contracts.
 
-use criticality::{
-    retained::RetainedBytes,
-    trace::{ExactReplay, ReplayFailure, ReplayPosition, Trace, TraceLimits},
-};
+use bytebudget::ByteCount;
+
+use criticality::trace::{ExactReplay, ReplayFailure, ReplayPosition, Trace, TraceLimits};
 
 #[test]
 fn exact_equality_advances_one_record_at_a_time() {
@@ -63,7 +62,7 @@ fn exhaustion_and_remaining_records_are_explicit() {
 
 #[test]
 fn trace_replay_borrows_bounded_evidence() {
-    let limits = TraceLimits::new(2, RetainedBytes::ZERO);
+    let limits = TraceLimits::new(2, ByteCount::ZERO);
     let first = [10_u8; 9];
     let second = [20_u8; 9];
     let mut trace = Trace::with_measure(limits, measure_record);
@@ -77,6 +76,6 @@ fn trace_replay_borrows_bounded_evidence() {
     assert!(replay.finish().is_ok());
 }
 
-const fn measure_record(_: &[u8; 9]) -> RetainedBytes {
-    RetainedBytes::ZERO
+const fn measure_record(_: &[u8; 9]) -> ByteCount {
+    ByteCount::ZERO
 }

@@ -1,7 +1,8 @@
 //! Watchdog consumer composition with heartbeat-owned deadline policy.
 
+use bytebudget::{ByteCount, Retained};
+
 use criticality::{
-    retained::{Retained, RetainedBytes},
     time::{Deadline, Moment},
     timeline::{EventToken, Timeline, TimelineId, TimelineLimits},
     trace::{Trace, TraceLimits},
@@ -20,8 +21,8 @@ enum Event {
 }
 
 impl Retained for Event {
-    fn retained_bytes(&self) -> RetainedBytes {
-        RetainedBytes::ZERO
+    fn retained_bytes(&self) -> ByteCount {
+        ByteCount::ZERO
     }
 }
 
@@ -32,8 +33,8 @@ enum Record {
 }
 
 impl Retained for Record {
-    fn retained_bytes(&self) -> RetainedBytes {
-        RetainedBytes::ZERO
+    fn retained_bytes(&self) -> ByteCount {
+        ByteCount::ZERO
     }
 }
 
@@ -46,10 +47,7 @@ struct Watchdog {
 
 #[test]
 fn watchdog_owns_heartbeat_deadline_and_expiration_policy() {
-    let mut timeline = Timeline::new(
-        TimelineId::new(6),
-        TimelineLimits::new(2, RetainedBytes::ZERO),
-    );
+    let mut timeline = Timeline::new(TimelineId::new(6), TimelineLimits::new(2, ByteCount::ZERO));
     let initial_deadline = Deadline::at(Moment::from_tick(10));
     let timer = timeline.schedule_at_in(initial_deadline.moment(), Phase::Timer, Event::Timeout);
     assert!(timer.is_ok());
@@ -66,7 +64,7 @@ fn watchdog_owns_heartbeat_deadline_and_expiration_policy() {
         timer: Some(timer),
         expired: false,
     };
-    let mut trace = Trace::new(TraceLimits::new(2, RetainedBytes::ZERO));
+    let mut trace = Trace::new(TraceLimits::new(2, ByteCount::ZERO));
 
     while let Some(delivery) = timeline.pop_next() {
         match *delivery.event() {

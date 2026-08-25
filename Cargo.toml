@@ -1,6 +1,6 @@
 [package]
 name = "criticality"
-version = "0.0.1-rc.2"
+version = "0.0.1-rc.3"
 description = "Bounded deterministic simulation primitives for state machines and effect-driven systems"
 edition = "2024"
 license = "Apache-2.0"
@@ -19,6 +19,7 @@ include = [
 ]
 
 [dependencies]
+bytebudget = "=0.0.1-rc.1"
 
 [lints.rust]
 missing_debug_implementations = "warn"

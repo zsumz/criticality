@@ -1,7 +1,8 @@
 //! Outbox consumer composition with consumer-owned supersession policy.
 
+use bytebudget::{ByteCount, Retained};
+
 use criticality::{
-    retained::{Retained, RetainedBytes},
     time::{Moment, Span},
     timeline::{EventToken, ScheduleFailure, Timeline, TimelineId, TimelineLimits},
     trace::{Trace, TraceLimits},
@@ -18,8 +19,8 @@ struct Publish {
 }
 
 impl Retained for Publish {
-    fn retained_bytes(&self) -> RetainedBytes {
-        RetainedBytes::ZERO
+    fn retained_bytes(&self) -> ByteCount {
+        ByteCount::ZERO
     }
 }
 
@@ -71,9 +72,9 @@ fn outbox_owns_supersession_and_publication_state() {
     let mut timeline = Timeline::empty_at(
         TimelineId::new(3),
         Moment::from_tick(7),
-        TimelineLimits::new(1, RetainedBytes::ZERO),
+        TimelineLimits::new(1, ByteCount::ZERO),
     );
-    let mut trace = Trace::new(TraceLimits::new(1, RetainedBytes::ZERO));
+    let mut trace = Trace::new(TraceLimits::new(1, ByteCount::ZERO));
 
     let first = outbox.stage(&mut timeline, 1, Span::from_ticks(3));
     assert!(first == Ok(None));
@@ -100,7 +101,7 @@ fn outbox_replacement_failure_preserves_both_values() {
     let mut timeline = Timeline::empty_at(
         TimelineId::new(7),
         Moment::from_tick(u64::MAX),
-        TimelineLimits::new(1, RetainedBytes::ZERO),
+        TimelineLimits::new(1, ByteCount::ZERO),
     );
     assert_eq!(outbox.stage(&mut timeline, 1, Span::ZERO), Ok(None));
 

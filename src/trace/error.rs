@@ -2,7 +2,7 @@
 
 use core::fmt;
 
-use crate::retained::RetainedBytes;
+use bytebudget::ByteCount;
 
 /// Why a trace rejected one record.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -15,18 +15,18 @@ pub enum TraceFailure {
     /// Retained-byte addition exceeded the fixed-width accounting domain.
     RetainedByteOverflow {
         /// Bytes retained before admission.
-        current: RetainedBytes,
+        current: ByteCount,
         /// Bytes measured for the rejected record.
-        record: RetainedBytes,
+        record: ByteCount,
     },
     /// The record would exceed the retained-byte limit.
     RetainedByteCapacity {
         /// Configured retained-byte limit.
-        limit: RetainedBytes,
+        limit: ByteCount,
         /// Bytes retained before admission.
-        current: RetainedBytes,
+        current: ByteCount,
         /// Bytes measured for the rejected record.
-        record: RetainedBytes,
+        record: ByteCount,
     },
 }
 

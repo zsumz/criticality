@@ -1,18 +1,35 @@
 //! Count- and byte-bounded deterministic record ownership.
 
 use alloc::vec::Vec;
-
-use crate::retained::{Retained, RetainedBytes};
+use bytebudget::{ByteBudget, ByteCount, Retained};
 
 use super::{ExactReplay, TraceError, TraceFailure, TraceLimits};
 
 /// A bounded, append-only typed trace.
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Trace<T> {
     limits: TraceLimits,
-    measure: fn(&T) -> RetainedBytes,
-    retained: RetainedBytes,
+    measure: fn(&T) -> ByteCount,
+    budget: ByteBudget,
     records: Vec<T>,
+}
+
+impl<T: Clone> Clone for Trace<T> {
+    fn clone(&self) -> Self {
+        let mut budget = ByteBudget::new(self.budget.limit());
+        // Reconstruct the exact aggregate without making live budgets cloneable.
+        let reservation = budget.try_reserve(self.budget.used());
+        assert!(
+            reservation.is_ok(),
+            "bytebudget invariant was violated while cloning a trace"
+        );
+        Self {
+            limits: self.limits,
+            measure: self.measure,
+            budget,
+            records: self.records.clone(),
+        }
+    }
 }
 
 impl<T: Retained> Trace<T> {
@@ -25,12 +42,15 @@ impl<T: Retained> Trace<T> {
 
 impl<T> Trace<T> {
     /// Creates an empty trace using an explicit record measurement function.
+    ///
+    /// `measure` must follow the same retained-storage model as [`Retained`].
+    /// Each attempted record is measured at most once after count preflight.
     #[must_use]
-    pub const fn with_measure(limits: TraceLimits, measure: fn(&T) -> RetainedBytes) -> Self {
+    pub const fn with_measure(limits: TraceLimits, measure: fn(&T) -> ByteCount) -> Self {
         Self {
             limits,
             measure,
-            retained: RetainedBytes::ZERO,
+            budget: ByteBudget::new(limits.retained_bytes()),
             records: Vec::new(),
         }
     }
@@ -55,8 +75,8 @@ impl<T> Trace<T> {
 
     /// Returns variable bytes retained by all records.
     #[must_use]
-    pub const fn retained_bytes(&self) -> RetainedBytes {
-        self.retained
+    pub const fn retained_bytes(&self) -> ByteCount {
+        self.budget.used()
     }
 
     /// Borrows all records in exact admission order.
@@ -93,8 +113,8 @@ impl<T> Trace<T> {
             ));
         }
         let measured = (self.measure)(&record);
-        let current = self.retained;
-        let Some(retained) = current.checked_add(measured) else {
+        let current = self.budget.used();
+        if current.checked_add(measured).is_none() {
             return Err(TraceError::new(
                 record,
                 TraceFailure::RetainedByteOverflow {
@@ -102,8 +122,8 @@ impl<T> Trace<T> {
                     record: measured,
                 },
             ));
-        };
-        if retained > self.limits.retained_bytes() {
+        }
+        if self.budget.try_reserve(measured).is_err() {
             return Err(TraceError::new(
                 record,
                 TraceFailure::RetainedByteCapacity {
@@ -114,7 +134,6 @@ impl<T> Trace<T> {
             ));
         }
         self.records.push(record);
-        self.retained = retained;
         Ok(())
     }
 

@@ -26,9 +26,10 @@
 
 ## Model
 
-Criticality is a dependency-free `no_std + alloc` library. It gives a state
-machine deterministic mechanisms while leaving domain events, transitions,
-effects, scheduling policy, fairness, and failure policy with the consumer.
+Criticality is a `no_std + alloc` library built on bytebudget's dependency-free
+byte-accounting primitives. It gives a state machine deterministic mechanisms
+while leaving domain events, transitions, effects, scheduling policy, fairness,
+and failure policy with the consumer.
 
 Every incrementally admitting container has explicit count and retained-byte
 limits. Finite values such as plans remain bounded by their consumer. Rejected
@@ -40,8 +41,8 @@ transitions, and every replay divergence identifies the first unmatched position
 ### Time and retention
 
 `Moment`, `Span`, `Deadline`, and `VirtualClock` define a fixed-width virtual
-time domain. `RetainedBytes` and `Retained` make variable memory part of
-admission instead of an implicit property of a container.
+time domain. bytebudget's `ByteCount` and `Retained` make variable memory part
+of admission instead of an implicit property of a container.
 
 ### Timeline
 
@@ -71,6 +72,9 @@ scenario's decisions.
 `ExactReplay` borrows finite expected evidence, advances only on equality, and
 reports the first divergence, exhaustion, and remaining records. A trace can
 lend its already-bounded records directly to replay without duplicating them.
+`Trace` stores its live aggregate in `ByteBudget`; cloning a trace reconstructs
+an independent budget at the same exact use instead of weakening bytebudget's
+non-cloneable live-budget contract.
 
 ### Consumer evidence
 
@@ -85,23 +89,28 @@ batch policy before repeated consumers demonstrate the same requirement.
 
 ```toml
 [dependencies]
-criticality = "=0.0.1-rc.2"
+bytebudget = "=0.0.1-rc.1"
+criticality = "=0.0.1-rc.3"
 ```
+
+Criticality uses bytebudget's types directly in its public signatures, so
+consumers name the same exact bytebudget release instead of depending on a
+Criticality compatibility alias.
 
 Schedule an event with explicit limits and virtual time:
 
 ```rust
+use bytebudget::ByteCount;
 use criticality::{
-    retained::RetainedBytes,
     time::Moment,
     timeline::{Timeline, TimelineId, TimelineLimits},
 };
 
-let limits = TimelineLimits::new(8, RetainedBytes::ZERO);
+let limits = TimelineLimits::new(8, ByteCount::ZERO);
 let mut timeline = Timeline::<&str>::with_measure(
     TimelineId::new(1),
     limits,
-    |_| RetainedBytes::ZERO,
+    |_| ByteCount::ZERO,
 );
 
 assert!(timeline.schedule_at(Moment::from_tick(3), "retry").is_ok());
@@ -122,7 +131,7 @@ zrail architecture, and clean diffs. There is no `scripts/check`; scripts
 contain implementation logic while declarative commands stay in the manifest.
 
 Criticality requires Rust 1.88 or newer. zcheck builds with Rust 1.96.1 or
-newer. `0.0.1-rc.2` is a release candidate.
+newer. `0.0.1-rc.3` is a release candidate.
 
 ## Scope
 

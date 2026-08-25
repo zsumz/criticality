@@ -1,19 +1,19 @@
 //! Hard count and retained-memory limits for exact scripts.
 
-use crate::retained::RetainedBytes;
+use bytebudget::ByteCount;
 
 /// Hard ownership limits for one exact finite script.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ScriptLimits {
     steps: usize,
     outcomes: usize,
-    retained_bytes: RetainedBytes,
+    retained_bytes: ByteCount,
 }
 
 impl ScriptLimits {
     /// Creates exact script limits.
     #[must_use]
-    pub const fn new(steps: usize, outcomes: usize, retained_bytes: RetainedBytes) -> Self {
+    pub const fn new(steps: usize, outcomes: usize, retained_bytes: ByteCount) -> Self {
         Self {
             steps,
             outcomes,
@@ -35,7 +35,7 @@ impl ScriptLimits {
 
     /// Returns the maximum variable retained bytes.
     #[must_use]
-    pub const fn retained_bytes(self) -> RetainedBytes {
+    pub const fn retained_bytes(self) -> ByteCount {
         self.retained_bytes
     }
 }

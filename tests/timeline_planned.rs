@@ -1,8 +1,9 @@
 //! Public planned-outcome timeline integration contracts.
 
+use bytebudget::{ByteCount, Retained};
+
 use criticality::{
     plan::Planned,
-    retained::{Retained, RetainedBytes},
     time::{Moment, Span},
     timeline::{Timeline, TimelineId, TimelineLimits},
 };
@@ -11,8 +12,8 @@ use criticality::{
 struct Event(u8);
 
 impl Retained for Event {
-    fn retained_bytes(&self) -> RetainedBytes {
-        RetainedBytes::ZERO
+    fn retained_bytes(&self) -> ByteCount {
+        ByteCount::ZERO
     }
 }
 
@@ -23,10 +24,8 @@ enum Phase {
 
 #[test]
 fn planned_outcomes_schedule_with_owned_delay_and_phase() {
-    let mut timeline = Timeline::<Event, Phase>::new(
-        TimelineId::new(1),
-        TimelineLimits::new(1, RetainedBytes::ZERO),
-    );
+    let mut timeline =
+        Timeline::<Event, Phase>::new(TimelineId::new(1), TimelineLimits::new(1, ByteCount::ZERO));
     let result =
         timeline.schedule_planned_in(Phase::External, Planned::new(Span::from_ticks(7), Event(1)));
     assert!(result.is_ok());

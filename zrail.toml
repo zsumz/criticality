@@ -48,11 +48,11 @@ reason = "Protected-base analysis reviews proposed source as data."
 
 [[invariant]]
 id = "BOUNDARY-01"
-title = "The core remains dependency-free, no-std, and policy-neutral"
+title = "The core remains no-std, bytebudget-backed, and policy-neutral"
 status = "enforced"
 document = "README.md#scope"
 evidence = [
-  "rust-test:tests/public_boundary.rs::core_manifest_and_facade_preserve_initial_boundary",
+  "rust-test:tests/public_boundary.rs::core_manifest_and_facade_use_one_locked_no_std_dependency",
   "gate:check",
   "gate:ci",
   "gate:architecture-review",
@@ -84,11 +84,12 @@ evidence = [
 
 [[invariant]]
 id = "RETAINED-01"
-title = "Retained-memory accounting is fixed-width and checked"
+title = "Byte counts, conversions, and retained measurement are explicit and checked"
 status = "enforced"
 document = "README.md#time-and-retention"
 evidence = [
-  "rust-test:tests/retained.rs::retained_bytes_use_checked_fixed_width_accounting",
+  "rust-test:tests/retained.rs::byte_count_uses_checked_fixed_width_accounting",
+  "rust-test:tests/retained.rs::byte_count_accepts_lossless_integer_conversions",
   "rust-test:tests/retained.rs::retained_measurement_is_consumer_owned_and_repeatable",
   "gate:check",
   "gate:ci",
@@ -200,6 +201,7 @@ evidence = [
   "rust-test:tests/trace_limits.rs::count_and_byte_rejections_preserve_record_ownership",
   "rust-test:tests/trace_limits.rs::retained_measurement_occurs_once_and_snapshot_is_exact",
   "rust-test:tests/trace_limits.rs::retained_byte_overflow_is_distinct_and_non_mutating",
+  "rust-test:tests/trace_limits.rs::cloning_trace_preserves_an_independent_aggregate_budget",
   "gate:check",
   "gate:ci",
 ]
@@ -289,7 +291,7 @@ reason = "Time and byte values use Rust's built-in partial ordering derive."
 
 [[source.rust.macros.allow]]
 name = "assert"
-reason = "Tests use Rust's standard assertion expansion."
+reason = "Tests and infallible budget reconstruction assert reviewed invariants."
 
 [[source.rust.macros.allow]]
 name = "assert_eq"
@@ -329,7 +331,7 @@ hard = 300
 name = "core"
 packages = ["criticality"]
 may_depend_on = []
-reason = "The dependency-free deterministic substrate owns only neutral mechanisms."
+reason = "The deterministic substrate owns neutral mechanisms over one locked no-std accounting dependency."
 
 [layer.dependencies]
 external = "locked"

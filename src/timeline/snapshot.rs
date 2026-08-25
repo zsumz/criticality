@@ -1,6 +1,8 @@
 //! Observable bounded timeline state.
 
-use crate::{retained::RetainedBytes, time::Moment};
+use bytebudget::ByteCount;
+
+use crate::time::Moment;
 
 use super::{TimelineId, TimelineLimits};
 
@@ -11,7 +13,7 @@ pub struct TimelineSnapshot {
     limits: TimelineLimits,
     now: Moment,
     pending_events: usize,
-    retained_bytes: RetainedBytes,
+    retained_bytes: ByteCount,
     next_at: Option<Moment>,
 }
 
@@ -21,7 +23,7 @@ impl TimelineSnapshot {
         limits: TimelineLimits,
         now: Moment,
         pending_events: usize,
-        retained_bytes: RetainedBytes,
+        retained_bytes: ByteCount,
         next_at: Option<Moment>,
     ) -> Self {
         Self {
@@ -60,7 +62,7 @@ impl TimelineSnapshot {
 
     /// Returns variable bytes retained by pending events.
     #[must_use]
-    pub const fn retained_bytes(self) -> RetainedBytes {
+    pub const fn retained_bytes(self) -> ByteCount {
         self.retained_bytes
     }
 

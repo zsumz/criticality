@@ -39,7 +39,7 @@ tools = ["cargo"]
 resources = ["cargo-target"]
 
 [tasks.no-std-host]
-description = "Check the dependency-free no-std library on the host."
+description = "Check the bytebudget-backed no-std library on the host."
 run = ["cargo", "check", "--lib", "--locked", "--offline"]
 tools = ["cargo"]
 resources = ["cargo-target"]

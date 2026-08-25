@@ -2,9 +2,10 @@
 
 use std::vec::Vec;
 
+use bytebudget::{ByteCount, Retained};
+
 use criticality::{
     plan::{Plan, Planned},
-    retained::{Retained, RetainedBytes},
     script::{ExactScript, ScriptFailure, ScriptLimits, ScriptPosition, ScriptStep},
     time::Span,
 };
@@ -12,11 +13,11 @@ use criticality::{
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 struct Value {
     id: u8,
-    bytes: RetainedBytes,
+    bytes: ByteCount,
 }
 
 impl Retained for Value {
-    fn retained_bytes(&self) -> RetainedBytes {
+    fn retained_bytes(&self) -> ByteCount {
         self.bytes
     }
 }
@@ -35,7 +36,7 @@ fn mismatch_is_non_consuming_and_exhaustion_is_explicit() {
     assert!(script.len() == 1);
     assert!(script.position() == ScriptPosition::ORIGIN);
     assert!(script.expected() == Some(&value(1, 2)));
-    assert!(script.retained_bytes() == RetainedBytes::new(6));
+    assert!(script.retained_bytes() == ByteCount::new(6));
 
     assert!(
         script.respond(&value(9, 0))
@@ -45,7 +46,7 @@ fn mismatch_is_non_consuming_and_exhaustion_is_explicit() {
     );
     assert!(script.position() == ScriptPosition::ORIGIN);
     assert!(script.len() == 1);
-    assert!(script.retained_bytes() == RetainedBytes::new(6));
+    assert!(script.retained_bytes() == ByteCount::new(6));
 
     let response = script.respond(&value(1, 2));
     assert!(response.is_ok());
@@ -55,7 +56,7 @@ fn mismatch_is_non_consuming_and_exhaustion_is_explicit() {
     assert!(response.into_outcomes() == [Planned::new(Span::from_ticks(3), value(2, 4))]);
     assert!(script.is_empty());
     assert!(script.position() == ScriptPosition::new(1));
-    assert!(script.retained_bytes() == RetainedBytes::ZERO);
+    assert!(script.retained_bytes() == ByteCount::ZERO);
     assert!(
         script.respond(&value(1, 2))
             == Err(ScriptFailure::Exhausted {
@@ -76,20 +77,20 @@ fn explicit_measurement_supports_foreign_types() {
     let Ok(script) = built else {
         return;
     };
-    assert!(script.retained_bytes() == RetainedBytes::new(32));
+    assert!(script.retained_bytes() == ByteCount::new(32));
 }
 
 const fn value(id: u8, bytes: u64) -> Value {
     Value {
         id,
-        bytes: RetainedBytes::new(bytes),
+        bytes: ByteCount::new(bytes),
     }
 }
 
 const fn limits(steps: usize, outcomes: usize, bytes: u64) -> ScriptLimits {
-    ScriptLimits::new(steps, outcomes, RetainedBytes::new(bytes))
+    ScriptLimits::new(steps, outcomes, ByteCount::new(bytes))
 }
 
-fn measure_array(_: &[u8; 16]) -> RetainedBytes {
-    RetainedBytes::new(16)
+fn measure_array(_: &[u8; 16]) -> ByteCount {
+    ByteCount::new(16)
 }

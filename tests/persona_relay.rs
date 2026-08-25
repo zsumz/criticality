@@ -2,9 +2,10 @@
 
 use std::vec::Vec;
 
+use bytebudget::{ByteCount, Retained};
+
 use criticality::{
     plan::{Plan, Planned},
-    retained::{Retained, RetainedBytes},
     script::{ExactScript, ScriptLimits, ScriptStep},
     time::{Moment, Span},
     timeline::{EventToken, ScheduleFailure, Timeline, TimelineId, TimelineLimits},
@@ -15,8 +16,8 @@ use criticality::{
 struct Request(u8);
 
 impl Retained for Request {
-    fn retained_bytes(&self) -> RetainedBytes {
-        RetainedBytes::ZERO
+    fn retained_bytes(&self) -> ByteCount {
+        ByteCount::ZERO
     }
 }
 
@@ -30,8 +31,8 @@ const fn packet(id: u8) -> Packet {
 }
 
 impl Retained for Packet {
-    fn retained_bytes(&self) -> RetainedBytes {
-        RetainedBytes::ZERO
+    fn retained_bytes(&self) -> ByteCount {
+        ByteCount::ZERO
     }
 }
 
@@ -127,10 +128,7 @@ fn apply_plan_with_rollback(
 #[test]
 fn relay_composes_script_plan_timeline_trace_and_replay() {
     let step = ScriptStep::new(Request(7), multipart_plan());
-    let built = ExactScript::try_new(
-        ScriptLimits::new(1, 3, RetainedBytes::ZERO),
-        Vec::from([step]),
-    );
+    let built = ExactScript::try_new(ScriptLimits::new(1, 3, ByteCount::ZERO), Vec::from([step]));
     assert!(built.is_ok());
     let Ok(mut script) = built else {
         return;
@@ -141,10 +139,7 @@ fn relay_composes_script_plan_timeline_trace_and_replay() {
         return;
     };
 
-    let mut timeline = Timeline::new(
-        TimelineId::new(4),
-        TimelineLimits::new(3, RetainedBytes::ZERO),
-    );
+    let mut timeline = Timeline::new(TimelineId::new(4), TimelineLimits::new(3, ByteCount::ZERO));
     let applied = apply_plan_with_rollback(&mut timeline, plan);
     assert!(applied.is_ok());
     let Ok(tokens) = applied else {
@@ -152,7 +147,7 @@ fn relay_composes_script_plan_timeline_trace_and_replay() {
     };
     assert!(tokens.len() == 3);
 
-    let mut trace = Trace::new(TraceLimits::new(3, RetainedBytes::ZERO));
+    let mut trace = Trace::new(TraceLimits::new(3, ByteCount::ZERO));
     while let Some(delivery) = timeline.pop_next() {
         assert!(trace.try_push(*delivery.event()).is_ok());
     }
@@ -167,10 +162,7 @@ fn relay_composes_script_plan_timeline_trace_and_replay() {
 #[test]
 fn relay_preflights_count_without_mutation() {
     let plan = multipart_plan();
-    let mut timeline = Timeline::new(
-        TimelineId::new(5),
-        TimelineLimits::new(2, RetainedBytes::ZERO),
-    );
+    let mut timeline = Timeline::new(TimelineId::new(5), TimelineLimits::new(2, ByteCount::ZERO));
     let before = timeline.snapshot();
     let result = apply_plan_with_rollback(&mut timeline, plan);
     let Err(failure) = result else {
@@ -187,7 +179,7 @@ fn relay_preserves_atomic_multi_outcome_admission() {
     let mut full_time = Timeline::empty_at(
         TimelineId::new(6),
         Moment::from_tick(u64::MAX),
-        TimelineLimits::new(3, RetainedBytes::ZERO),
+        TimelineLimits::new(3, ByteCount::ZERO),
     );
     let before = full_time.snapshot();
     let result = apply_plan_with_rollback(&mut full_time, plan);
@@ -214,7 +206,7 @@ fn relay_rolls_back_all_outcomes_after_late_failure() {
     ]));
     let mut timeline = Timeline::with_measure(
         TimelineId::new(8),
-        TimelineLimits::new(3, RetainedBytes::ZERO),
+        TimelineLimits::new(3, ByteCount::ZERO),
         measure_packet_two,
     );
     let before = timeline.snapshot();
@@ -225,9 +217,9 @@ fn relay_rolls_back_all_outcomes_after_late_failure() {
     assert_eq!(
         failure.failure,
         ScheduleFailure::RetainedByteCapacity {
-            limit: RetainedBytes::ZERO,
-            current: RetainedBytes::ZERO,
-            event: RetainedBytes::new(1),
+            limit: ByteCount::ZERO,
+            current: ByteCount::ZERO,
+            event: ByteCount::new(1),
         }
     );
     assert_eq!(
@@ -241,10 +233,10 @@ fn relay_rolls_back_all_outcomes_after_late_failure() {
     assert_eq!(timeline.snapshot(), before);
 }
 
-const fn measure_packet_two(packet: &Packet) -> RetainedBytes {
+const fn measure_packet_two(packet: &Packet) -> ByteCount {
     if packet.0[0] == 2 {
-        RetainedBytes::new(1)
+        ByteCount::new(1)
     } else {
-        RetainedBytes::ZERO
+        ByteCount::ZERO
     }
 }

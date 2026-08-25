@@ -1,7 +1,8 @@
 //! Public timeline ordering and observation contracts.
 
+use bytebudget::{ByteCount, Retained};
+
 use criticality::{
-    retained::{Retained, RetainedBytes},
     time::{Moment, Span},
     timeline::{Timeline, TimelineId, TimelineLimits},
 };
@@ -10,8 +11,8 @@ use criticality::{
 struct Event(u8);
 
 impl Retained for Event {
-    fn retained_bytes(&self) -> RetainedBytes {
-        RetainedBytes::ZERO
+    fn retained_bytes(&self) -> ByteCount {
+        ByteCount::ZERO
     }
 }
 
@@ -24,7 +25,7 @@ enum Phase {
 
 #[test]
 fn timeline_orders_by_moment_phase_and_insertion_identity() {
-    let limits = TimelineLimits::new(8, RetainedBytes::ZERO);
+    let limits = TimelineLimits::new(8, ByteCount::ZERO);
     let mut timeline = Timeline::<Event, Phase>::new(TimelineId::new(7), limits);
 
     assert!(
@@ -75,7 +76,7 @@ fn timeline_orders_by_moment_phase_and_insertion_identity() {
 
 #[test]
 fn snapshots_report_exact_bounded_state() {
-    let limits = TimelineLimits::new(2, RetainedBytes::new(8));
+    let limits = TimelineLimits::new(2, ByteCount::new(8));
     let mut timeline = Timeline::<Event>::new(TimelineId::new(9), limits);
     assert!(
         timeline
@@ -88,6 +89,6 @@ fn snapshots_report_exact_bounded_state() {
     assert!(snapshot.limits() == limits);
     assert!(snapshot.now() == Moment::ORIGIN);
     assert!(snapshot.pending_events() == 1);
-    assert!(snapshot.retained_bytes() == RetainedBytes::ZERO);
+    assert!(snapshot.retained_bytes() == ByteCount::ZERO);
     assert!(snapshot.next_at() == Some(Moment::from_tick(3)));
 }

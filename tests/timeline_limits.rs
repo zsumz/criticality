@@ -1,7 +1,8 @@
 //! Public timeline admission and ownership contracts.
 
+use bytebudget::{ByteCount, Retained};
+
 use criticality::{
-    retained::{Retained, RetainedBytes},
     time::{Moment, Span},
     timeline::{ScheduleFailure, Timeline, TimelineId, TimelineLimits},
 };
@@ -9,11 +10,11 @@ use criticality::{
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 struct Event {
     id: u8,
-    bytes: RetainedBytes,
+    bytes: ByteCount,
 }
 
 impl Retained for Event {
-    fn retained_bytes(&self) -> RetainedBytes {
+    fn retained_bytes(&self) -> ByteCount {
         self.bytes
     }
 }
@@ -22,7 +23,7 @@ impl Retained for Event {
 fn count_and_byte_rejections_preserve_event_ownership() {
     let mut timeline = Timeline::new(
         TimelineId::new(1),
-        TimelineLimits::new(1, RetainedBytes::new(4)),
+        TimelineLimits::new(1, ByteCount::new(4)),
     );
     assert!(timeline.schedule_after(Span::ZERO, event(1, 4)).is_ok());
 
@@ -44,7 +45,7 @@ fn count_and_byte_rejections_preserve_event_ownership() {
 
     let mut byte_limited = Timeline::new(
         TimelineId::new(2),
-        TimelineLimits::new(2, RetainedBytes::new(4)),
+        TimelineLimits::new(2, ByteCount::new(4)),
     );
     assert!(byte_limited.schedule_after(Span::ZERO, event(3, 4)).is_ok());
     let rejected = event(4, 1);
@@ -59,7 +60,7 @@ fn count_and_byte_rejections_preserve_event_ownership() {
 
 #[test]
 fn overflow_and_past_rejections_leave_timeline_unchanged() {
-    let limits = TimelineLimits::new(2, RetainedBytes::new(u64::MAX));
+    let limits = TimelineLimits::new(2, ByteCount::MAX);
     let mut timeline = Timeline::empty_at(TimelineId::new(2), Moment::from_tick(5), limits);
     let past = event(1, 1);
     let result = timeline.schedule_at(Moment::from_tick(4), past);
@@ -92,7 +93,7 @@ fn relative_time_overflow_and_zero_capacity_preserve_events() {
     let mut full_time = Timeline::empty_at(
         TimelineId::new(3),
         Moment::from_tick(u64::MAX),
-        TimelineLimits::new(1, RetainedBytes::new(1)),
+        TimelineLimits::new(1, ByteCount::new(1)),
     );
     let rejected = event(1, 1);
     let result = full_time.schedule_after(Span::from_ticks(1), rejected);
@@ -105,7 +106,7 @@ fn relative_time_overflow_and_zero_capacity_preserve_events() {
 
     let mut zero = Timeline::new(
         TimelineId::new(4),
-        TimelineLimits::new(0, RetainedBytes::new(8)),
+        TimelineLimits::new(0, ByteCount::new(8)),
     );
     let rejected = event(2, 0);
     let result = zero.schedule_after(Span::ZERO, rejected);
@@ -121,7 +122,7 @@ fn relative_time_overflow_and_zero_capacity_preserve_events() {
 fn explicit_measurement_supports_foreign_event_types() {
     let mut timeline = Timeline::with_measure(
         TimelineId::new(5),
-        TimelineLimits::new(1, RetainedBytes::new(4)),
+        TimelineLimits::new(1, ByteCount::new(4)),
         measure_string,
     );
     assert!(
@@ -129,20 +130,20 @@ fn explicit_measurement_supports_foreign_event_types() {
             .schedule_after(Span::ZERO, String::from("four"))
             .is_ok()
     );
-    assert!(timeline.snapshot().retained_bytes() == RetainedBytes::new(4));
+    assert!(timeline.snapshot().retained_bytes() == ByteCount::new(4));
 }
 
 const fn event(id: u8, bytes: u64) -> Event {
     Event {
         id,
-        bytes: RetainedBytes::new(bytes),
+        bytes: ByteCount::new(bytes),
     }
 }
 
-fn measure_string(value: &String) -> RetainedBytes {
-    match RetainedBytes::try_from(value.capacity()) {
+fn measure_string(value: &String) -> ByteCount {
+    match ByteCount::try_from(value.capacity()) {
         Ok(bytes) => bytes,
-        Err(_) => RetainedBytes::new(u64::MAX),
+        Err(_) => ByteCount::MAX,
     }
 }
 

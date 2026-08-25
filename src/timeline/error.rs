@@ -2,10 +2,9 @@
 
 use core::fmt;
 
-use crate::{
-    retained::RetainedBytes,
-    time::{Moment, Span},
-};
+use bytebudget::ByteCount;
+
+use crate::time::{Moment, Span};
 
 /// Why a timeline rejected one event.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -32,18 +31,18 @@ pub enum ScheduleFailure {
     /// Retained-byte addition exceeded the fixed-width accounting domain.
     RetainedByteOverflow {
         /// Bytes retained before admission.
-        current: RetainedBytes,
+        current: ByteCount,
         /// Bytes measured for the rejected event.
-        event: RetainedBytes,
+        event: ByteCount,
     },
     /// The event would exceed the retained-byte limit.
     RetainedByteCapacity {
         /// Configured retained-byte limit.
-        limit: RetainedBytes,
+        limit: ByteCount,
         /// Bytes retained before admission.
-        current: RetainedBytes,
+        current: ByteCount,
         /// Bytes measured for the rejected event.
-        event: RetainedBytes,
+        event: ByteCount,
     },
     /// Every stable event identity has been issued.
     EventIdsExhausted,

@@ -2,74 +2,63 @@
 
 use core::{fmt::Debug, hash::Hash};
 
-use criticality::retained::{Retained, RetainedBytes, RetainedBytesOverflow};
+use bytebudget::{ByteCount, ByteCountOverflow, Retained};
 
-const CONST_RETAINED: RetainedBytes = RetainedBytes::new(7);
-const CONST_TOTAL: Option<RetainedBytes> = CONST_RETAINED.checked_add(RetainedBytes::new(5));
+const CONST_RETAINED: ByteCount = ByteCount::new(7);
+const CONST_TOTAL: Option<ByteCount> = CONST_RETAINED.checked_add(ByteCount::new(5));
 
 fn require_structural_value<T: Clone + Copy + Debug + Default + Eq + Hash + Ord>() {}
 
 fn require_error<T: core::error::Error + Send + Sync + 'static>() {}
 
 struct Payload {
-    bytes: RetainedBytes,
+    bytes: ByteCount,
 }
 
 impl Retained for Payload {
-    fn retained_bytes(&self) -> RetainedBytes {
+    fn retained_bytes(&self) -> ByteCount {
         self.bytes
     }
 }
 
 #[test]
-fn retained_bytes_use_checked_fixed_width_accounting() {
-    require_structural_value::<RetainedBytes>();
-    require_error::<RetainedBytesOverflow>();
+fn byte_count_uses_checked_fixed_width_accounting() {
+    require_structural_value::<ByteCount>();
+    require_error::<ByteCountOverflow>();
 
-    assert!(CONST_TOTAL == Some(RetainedBytes::new(12)));
-    assert!(RetainedBytes::ZERO.get() == 0);
-    assert!(RetainedBytes::default() == RetainedBytes::ZERO);
-    assert!(RetainedBytes::new(7).get() == 7);
-    assert!(
-        RetainedBytes::new(7).checked_add(RetainedBytes::new(5)) == Some(RetainedBytes::new(12))
-    );
-    assert!(
-        RetainedBytes::new(u64::MAX)
-            .checked_add(RetainedBytes::new(1))
-            .is_none()
-    );
-    assert!(
-        RetainedBytes::new(7).checked_sub(RetainedBytes::new(5)) == Some(RetainedBytes::new(2))
-    );
-    assert!(
-        RetainedBytes::new(5)
-            .checked_sub(RetainedBytes::new(7))
-            .is_none()
-    );
+    assert!(CONST_TOTAL == Some(ByteCount::new(12)));
+    assert!(ByteCount::ZERO.get() == 0);
+    assert!(ByteCount::ZERO.is_zero());
+    assert!(ByteCount::MAX.get() == u64::MAX);
+    assert!(ByteCount::default() == ByteCount::ZERO);
+    assert!(ByteCount::new(7).get() == 7);
+    assert!(ByteCount::new(7).checked_add(ByteCount::new(5)) == Some(ByteCount::new(12)));
+    assert!(ByteCount::MAX.checked_add(ByteCount::new(1)).is_none());
+    assert!(ByteCount::new(7).checked_sub(ByteCount::new(5)) == Some(ByteCount::new(2)));
+    assert!(ByteCount::new(5).checked_sub(ByteCount::new(7)).is_none());
 }
 
 #[test]
-fn retained_bytes_accept_lossless_integer_conversions() {
-    assert!(RetainedBytes::from(7_u32) == RetainedBytes::new(7));
-    assert!(RetainedBytes::from(9_u64) == RetainedBytes::new(9));
-    assert!(RetainedBytes::try_from(11_usize) == Ok(RetainedBytes::new(11)));
+fn byte_count_accepts_lossless_integer_conversions() {
+    assert!(ByteCount::from(7_u32) == ByteCount::new(7));
+    assert!(ByteCount::from(9_u64) == ByteCount::new(9));
+    assert!(u64::from(ByteCount::new(9)) == 9);
+    assert!(ByteCount::try_from(11_usize) == Ok(ByteCount::new(11)));
+    assert!(usize::try_from(ByteCount::new(11)) == Ok(11));
 }
 
 #[test]
 fn retained_measurement_is_consumer_owned_and_repeatable() {
     let payload = Payload {
-        bytes: RetainedBytes::new(13),
+        bytes: ByteCount::new(13),
     };
 
-    assert!(payload.retained_bytes() == RetainedBytes::new(13));
-    assert!(payload.retained_bytes() == RetainedBytes::new(13));
-    assert!(().retained_bytes() == RetainedBytes::ZERO);
+    assert!(payload.retained_bytes() == ByteCount::new(13));
+    assert!(payload.retained_bytes() == ByteCount::new(13));
+    assert!(().retained_bytes() == ByteCount::ZERO);
 }
 
 #[test]
-fn retained_overflow_error_uses_core_error_contract() {
-    assert!(
-        format!("{RetainedBytesOverflow}")
-            == "retained byte count exceeds the u64 accounting domain"
-    );
+fn byte_count_overflow_error_uses_core_error_contract() {
+    assert!(format!("{ByteCountOverflow}") == "byte count does not fit the target integer type");
 }

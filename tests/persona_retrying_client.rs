@@ -1,8 +1,9 @@
 //! Retrying-client consumer composition without framework-owned policy.
 
+use bytebudget::{ByteCount, Retained};
+
 use criticality::{
     plan::{Plan, Planned},
-    retained::{Retained, RetainedBytes},
     time::Span,
     timeline::{Timeline, TimelineId, TimelineLimits},
     trace::{Trace, TraceLimits},
@@ -12,8 +13,8 @@ use criticality::{
 struct Attempt(u8);
 
 impl Retained for Attempt {
-    fn retained_bytes(&self) -> RetainedBytes {
-        RetainedBytes::ZERO
+    fn retained_bytes(&self) -> ByteCount {
+        ByteCount::ZERO
     }
 }
 
@@ -21,8 +22,8 @@ impl Retained for Attempt {
 struct Attempted(u8);
 
 impl Retained for Attempted {
-    fn retained_bytes(&self) -> RetainedBytes {
-        RetainedBytes::ZERO
+    fn retained_bytes(&self) -> ByteCount {
+        ByteCount::ZERO
     }
 }
 
@@ -53,11 +54,8 @@ impl RetryingClient {
 #[test]
 fn retrying_client_owns_retry_policy_and_run_loop() {
     let mut client = RetryingClient::new(3);
-    let mut timeline = Timeline::new(
-        TimelineId::new(1),
-        TimelineLimits::new(1, RetainedBytes::ZERO),
-    );
-    let mut trace = Trace::new(TraceLimits::new(3, RetainedBytes::ZERO));
+    let mut timeline = Timeline::new(TimelineId::new(1), TimelineLimits::new(1, ByteCount::ZERO));
+    let mut trace = Trace::new(TraceLimits::new(3, ByteCount::ZERO));
     assert!(timeline.schedule_after(Span::ZERO, Attempt(0)).is_ok());
 
     while let Some(delivery) = timeline.pop_next() {

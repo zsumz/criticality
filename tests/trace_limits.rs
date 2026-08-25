@@ -1,39 +1,50 @@
 //! Public trace admission, accounting, and ownership contracts.
 
-use core::cell::Cell;
+use bytebudget::{ByteCount, Retained};
 
-use criticality::{
-    retained::{Retained, RetainedBytes},
-    trace::{Trace, TraceFailure, TraceLimits},
-};
+use criticality::trace::{Trace, TraceFailure, TraceLimits};
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 struct Record {
     id: u8,
-    bytes: RetainedBytes,
-    measurements: Cell<u8>,
+    bytes: ByteCount,
 }
 
 impl Record {
     const fn new(id: u8, bytes: u64) -> Self {
         Self {
             id,
-            bytes: RetainedBytes::new(bytes),
-            measurements: Cell::new(0),
+            bytes: ByteCount::new(bytes),
         }
     }
 }
 
 impl Retained for Record {
-    fn retained_bytes(&self) -> RetainedBytes {
-        self.measurements.set(self.measurements.get() + 1);
+    fn retained_bytes(&self) -> ByteCount {
         self.bytes
+    }
+}
+
+#[derive(Clone, Debug)]
+struct MeasuredRecord {
+    id: u8,
+    bytes: ByteCount,
+    measurements: core::cell::Cell<u8>,
+}
+
+impl MeasuredRecord {
+    const fn new(id: u8, bytes: u64) -> Self {
+        Self {
+            id,
+            bytes: ByteCount::new(bytes),
+            measurements: core::cell::Cell::new(0),
+        }
     }
 }
 
 #[test]
 fn count_and_byte_rejections_preserve_record_ownership() {
-    let limits = TraceLimits::new(1, RetainedBytes::new(4));
+    let limits = TraceLimits::new(1, ByteCount::new(4));
     let mut trace = Trace::new(limits);
     assert!(trace.try_push(Record::new(1, 4)).is_ok());
 
@@ -45,7 +56,7 @@ fn count_and_byte_rejections_preserve_record_ownership() {
     assert!(error.failure() == TraceFailure::RecordCapacity { limit: 1 });
     assert!(error.into_record().id == 2);
 
-    let mut trace = Trace::new(TraceLimits::new(2, RetainedBytes::new(4)));
+    let mut trace = Trace::new(TraceLimits::new(2, ByteCount::new(4)));
     assert!(trace.try_push(Record::new(3, 4)).is_ok());
     let result = trace.try_push(Record::new(4, 1));
     assert!(result.is_err());
@@ -58,25 +69,60 @@ fn count_and_byte_rejections_preserve_record_ownership() {
 
 #[test]
 fn retained_measurement_occurs_once_and_snapshot_is_exact() {
-    let limits = TraceLimits::new(2, RetainedBytes::new(8));
-    let mut trace = Trace::new(limits);
+    let limits = TraceLimits::new(2, ByteCount::new(8));
+    let mut trace = Trace::with_measure(limits, measure_record);
     assert!(trace.is_empty());
-    assert!(trace.try_push(Record::new(1, 3)).is_ok());
+    assert!(trace.try_push(MeasuredRecord::new(1, 3)).is_ok());
     let snapshot = (trace.limits(), trace.len(), trace.retained_bytes());
-    assert!(snapshot == (limits, 1, RetainedBytes::new(3)));
+    assert!(snapshot == (limits, 1, ByteCount::new(3)));
     let Some(record) = trace.iter().next() else {
         return;
     };
     assert!(record.measurements.get() == 1);
     assert!(trace.as_slice()[0].id == 1);
-    assert!(trace.retained_bytes() == RetainedBytes::new(3));
+    assert!(trace.retained_bytes() == ByteCount::new(3));
+}
+
+#[test]
+fn cloning_trace_preserves_an_independent_aggregate_budget() {
+    let limits = TraceLimits::new(3, ByteCount::new(5));
+    let mut trace = Trace::with_measure(limits, measure_record);
+    assert!(trace.try_push(MeasuredRecord::new(1, 3)).is_ok());
+
+    let mut cloned = trace.clone();
+    assert!(cloned.retained_bytes() == ByteCount::new(3));
+    assert!(cloned.as_slice()[0].measurements.get() == 1);
+    assert!(cloned.try_push(MeasuredRecord::new(2, 2)).is_ok());
+    let rejected = cloned.try_push(MeasuredRecord::new(3, 1));
+    assert!(rejected.is_err());
+    let Err(error) = rejected else {
+        return;
+    };
+    assert!(is_byte_capacity(error.failure()));
+    let rejected = error.into_record();
+    assert!(rejected.id == 3);
+    assert!(rejected.measurements.get() == 1);
+
+    assert!(trace.try_push(MeasuredRecord::new(4, 2)).is_ok());
+
+    assert!(trace.len() == 2);
+    assert!(trace.retained_bytes() == ByteCount::new(5));
+    assert!(cloned.len() == 2);
+    assert!(cloned.retained_bytes() == ByteCount::new(5));
+    assert!(trace.as_slice()[0].measurements.get() == 1);
+    assert!(cloned.as_slice()[0].measurements.get() == 1);
+    assert!(trace.as_slice()[1].measurements.get() == 1);
+    assert!(cloned.as_slice()[1].measurements.get() == 1);
 }
 
 #[test]
 fn retained_byte_overflow_is_distinct_and_non_mutating() {
-    let limits = TraceLimits::new(2, RetainedBytes::new(u64::MAX));
+    let limits = TraceLimits::new(2, ByteCount::MAX);
     let mut trace = Trace::new(limits);
     assert!(trace.try_push(Record::new(1, u64::MAX)).is_ok());
+    let cloned = trace.clone();
+    assert!(cloned.len() == 1);
+    assert!(cloned.retained_bytes() == ByteCount::MAX);
     let result = trace.try_push(Record::new(2, 1));
     assert!(result.is_err());
     let Err(error) = result else {
@@ -85,7 +131,7 @@ fn retained_byte_overflow_is_distinct_and_non_mutating() {
     assert!(is_byte_overflow(error.failure()));
     assert!(error.into_record().id == 2);
     assert!(trace.len() == 1);
-    assert!(trace.retained_bytes() == RetainedBytes::new(u64::MAX));
+    assert!(trace.retained_bytes() == ByteCount::MAX);
 }
 
 #[test]
@@ -113,9 +159,14 @@ const fn is_byte_overflow(failure: TraceFailure) -> bool {
     true
 }
 
-fn measure_string(value: &String) -> RetainedBytes {
-    match RetainedBytes::try_from(value.capacity()) {
+fn measure_string(value: &String) -> ByteCount {
+    match ByteCount::try_from(value.capacity()) {
         Ok(bytes) => bytes,
-        Err(_) => RetainedBytes::new(u64::MAX),
+        Err(_) => ByteCount::MAX,
     }
+}
+
+fn measure_record(record: &MeasuredRecord) -> ByteCount {
+    record.measurements.set(record.measurements.get() + 1);
+    record.bytes
 }

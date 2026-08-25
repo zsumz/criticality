@@ -1,11 +1,9 @@
 //! Bounded exact FIFO matching with non-consuming mismatch.
 
 use alloc::{collections::VecDeque, vec::Vec};
+use bytebudget::{ByteCount, Retained};
 
-use crate::{
-    plan::Plan,
-    retained::{Retained, RetainedBytes},
-};
+use crate::plan::Plan;
 
 use super::{
     ScriptBuildError, ScriptBuildFailure, ScriptFailure, ScriptLimits, ScriptPosition, ScriptStep,
@@ -16,7 +14,7 @@ use super::{
 pub struct ExactScript<Q, R> {
     limits: ScriptLimits,
     position: ScriptPosition,
-    retained: RetainedBytes,
+    retained: ByteCount,
     steps: VecDeque<MeasuredStep<Q, R>>,
 }
 
@@ -37,14 +35,18 @@ impl<Q: Retained, R: Retained> ExactScript<Q, R> {
 impl<Q, R> ExactScript<Q, R> {
     /// Builds a script using explicit request and response measurement.
     ///
+    /// Both measurement functions must follow the same retained-storage model
+    /// as [`Retained`]. After count preflight, each supplied value is measured
+    /// exactly once.
+    ///
     /// # Errors
     ///
     /// Returns every step when count or measured-byte admission fails.
     pub fn try_with_measure(
         limits: ScriptLimits,
         steps: Vec<ScriptStep<Q, R>>,
-        measure_request: fn(&Q) -> RetainedBytes,
-        measure_response: fn(&R) -> RetainedBytes,
+        measure_request: fn(&Q) -> ByteCount,
+        measure_response: fn(&R) -> ByteCount,
     ) -> Result<Self, ScriptBuildError<Q, R>> {
         if steps.len() > limits.steps() {
             let actual = steps.len();
@@ -75,7 +77,7 @@ impl<Q, R> ExactScript<Q, R> {
         };
         let retained = measurements
             .last()
-            .map_or(RetainedBytes::ZERO, |measurement| measurement.total);
+            .map_or(ByteCount::ZERO, |measurement| measurement.total);
         if retained > limits.retained_bytes() {
             return Err(ScriptBuildError::new(
                 steps,
@@ -121,7 +123,7 @@ impl<Q, R> ExactScript<Q, R> {
 
     /// Returns variable bytes retained by all remaining steps and outcomes.
     #[must_use]
-    pub const fn retained_bytes(&self) -> RetainedBytes {
+    pub const fn retained_bytes(&self) -> ByteCount {
         self.retained
     }
 
@@ -170,13 +172,13 @@ impl<Q: PartialEq, R> ExactScript<Q, R> {
 #[derive(Clone, Debug)]
 struct MeasuredStep<Q, R> {
     step: ScriptStep<Q, R>,
-    retained: RetainedBytes,
+    retained: ByteCount,
 }
 
 #[derive(Clone, Copy, Debug)]
 struct Measurement {
-    step: RetainedBytes,
-    total: RetainedBytes,
+    step: ByteCount,
+    total: ByteCount,
 }
 
 fn count_outcomes<Q, R>(steps: &[ScriptStep<Q, R>]) -> Result<usize, ScriptBuildFailure> {
@@ -192,10 +194,10 @@ fn count_outcomes<Q, R>(steps: &[ScriptStep<Q, R>]) -> Result<usize, ScriptBuild
 
 fn measure_steps<Q, R>(
     steps: &[ScriptStep<Q, R>],
-    measure_request: fn(&Q) -> RetainedBytes,
-    measure_response: fn(&R) -> RetainedBytes,
+    measure_request: fn(&Q) -> ByteCount,
+    measure_response: fn(&R) -> ByteCount,
 ) -> Result<Vec<Measurement>, ScriptBuildFailure> {
-    let mut total = RetainedBytes::ZERO;
+    let mut total = ByteCount::ZERO;
     let mut measurements = Vec::with_capacity(steps.len());
     for step in steps {
         let Some(measured) = measure_step(step, measure_request, measure_response) else {
@@ -215,9 +217,9 @@ fn measure_steps<Q, R>(
 
 fn measure_step<Q, R>(
     step: &ScriptStep<Q, R>,
-    measure_request: fn(&Q) -> RetainedBytes,
-    measure_response: fn(&R) -> RetainedBytes,
-) -> Option<RetainedBytes> {
+    measure_request: fn(&Q) -> ByteCount,
+    measure_response: fn(&R) -> ByteCount,
+) -> Option<ByteCount> {
     let mut total = measure_request(step.expected());
     for outcome in step.response().as_slice() {
         total = total.checked_add(measure_response(outcome.outcome()))?;

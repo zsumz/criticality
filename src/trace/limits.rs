@@ -1,18 +1,18 @@
 //! Hard ownership limits for one trace.
 
-use crate::retained::RetainedBytes;
+use bytebudget::ByteCount;
 
 /// Count and variable retained-memory limits for one trace.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct TraceLimits {
     records: usize,
-    retained_bytes: RetainedBytes,
+    retained_bytes: ByteCount,
 }
 
 impl TraceLimits {
     /// Creates exact trace ownership limits.
     #[must_use]
-    pub const fn new(records: usize, retained_bytes: RetainedBytes) -> Self {
+    pub const fn new(records: usize, retained_bytes: ByteCount) -> Self {
         Self {
             records,
             retained_bytes,
@@ -27,7 +27,7 @@ impl TraceLimits {
 
     /// Returns the maximum variable bytes retained by records.
     #[must_use]
-    pub const fn retained_bytes(self) -> RetainedBytes {
+    pub const fn retained_bytes(self) -> ByteCount {
         self.retained_bytes
     }
 }

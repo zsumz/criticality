@@ -12,7 +12,6 @@ extern crate alloc;
 
 pub mod entropy;
 pub mod plan;
-pub mod retained;
 pub mod script;
 pub mod time;
 pub mod timeline;
