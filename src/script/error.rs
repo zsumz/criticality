@@ -1,8 +1,9 @@
 //! Ownership-preserving script construction and matching failures.
 
 use alloc::vec::Vec;
-use bytebudget::ByteCount;
 use core::fmt;
+
+use crate::ByteCount;
 
 use super::ScriptStep;
 

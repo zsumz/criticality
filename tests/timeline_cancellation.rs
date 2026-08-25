@@ -1,8 +1,7 @@
 //! Public exact timeline cancellation contracts.
 
-use bytebudget::{ByteCount, Retained};
-
 use criticality::{
+    ByteCount, Retained,
     time::{Moment, Span},
     timeline::{Timeline, TimelineId, TimelineLimits},
 };

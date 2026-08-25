@@ -1,8 +1,7 @@
 //! Retrying-client consumer composition without framework-owned policy.
 
-use bytebudget::{ByteCount, Retained};
-
 use criticality::{
+    ByteCount, Retained,
     plan::{Plan, Planned},
     time::Span,
     timeline::{Timeline, TimelineId, TimelineLimits},

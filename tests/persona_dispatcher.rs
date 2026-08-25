@@ -1,8 +1,7 @@
 //! Dispatcher consumer composition with consumer-defined phases and effects.
 
-use bytebudget::{ByteCount, Retained};
-
 use criticality::{
+    ByteCount, Retained,
     time::Moment,
     timeline::{Timeline, TimelineId, TimelineLimits},
     trace::{Trace, TraceLimits},

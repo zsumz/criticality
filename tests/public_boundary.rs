@@ -17,6 +17,11 @@ fn core_manifest_and_facade_use_one_locked_no_std_dependency() {
     assert!(FACADE.contains("#![no_std]"));
     assert!(FACADE.contains("#![forbid(unsafe_code)]"));
 
+    let bytebudget_exports = FACADE
+        .lines()
+        .filter(|line| line.starts_with("pub use bytebudget"));
+    assert!(bytebudget_exports.eq(["pub use bytebudget::{ByteCount, Retained};"]));
+
     for module in ["entropy", "plan", "script", "time", "timeline", "trace"] {
         assert!(FACADE.contains(&format!("pub mod {module};")));
     }

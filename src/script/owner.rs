@@ -1,9 +1,8 @@
 //! Bounded exact FIFO matching with non-consuming mismatch.
 
 use alloc::{collections::VecDeque, vec::Vec};
-use bytebudget::{ByteCount, Retained};
 
-use crate::plan::Plan;
+use crate::{ByteCount, Retained, plan::Plan};
 
 use super::{
     ScriptBuildError, ScriptBuildFailure, ScriptFailure, ScriptLimits, ScriptPosition, ScriptStep,

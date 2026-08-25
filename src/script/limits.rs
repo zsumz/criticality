@@ -1,6 +1,6 @@
 //! Hard count and retained-memory limits for exact scripts.
 
-use bytebudget::ByteCount;
+use crate::ByteCount;
 
 /// Hard ownership limits for one exact finite script.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

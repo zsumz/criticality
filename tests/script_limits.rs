@@ -2,9 +2,8 @@
 
 use std::vec::Vec;
 
-use bytebudget::{ByteCount, Retained};
-
 use criticality::{
+    ByteCount, Retained,
     plan::{Plan, Planned},
     script::{ExactScript, ScriptBuildFailure, ScriptLimits, ScriptStep},
     time::Span,

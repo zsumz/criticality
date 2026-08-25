@@ -1,6 +1,6 @@
 //! Hard ownership limits for one trace.
 
-use bytebudget::ByteCount;
+use crate::ByteCount;
 
 /// Count and variable retained-memory limits for one trace.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]

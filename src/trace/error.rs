@@ -2,7 +2,7 @@
 
 use core::fmt;
 
-use bytebudget::ByteCount;
+use crate::ByteCount;
 
 /// Why a trace rejected one record.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

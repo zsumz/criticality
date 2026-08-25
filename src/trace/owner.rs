@@ -1,7 +1,9 @@
 //! Count- and byte-bounded deterministic record ownership.
 
 use alloc::vec::Vec;
-use bytebudget::{ByteBudget, ByteCount, Retained};
+use bytebudget::ByteBudget;
+
+use crate::{ByteCount, Retained};
 
 use super::{ExactReplay, TraceError, TraceFailure, TraceLimits};
 

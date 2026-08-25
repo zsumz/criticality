@@ -2,9 +2,10 @@
 
 use core::fmt;
 
-use bytebudget::ByteCount;
-
-use crate::time::{Moment, Span};
+use crate::{
+    ByteCount,
+    time::{Moment, Span},
+};
 
 /// Why a timeline rejected one event.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

@@ -1,8 +1,9 @@
 //! Public exact replay position and first-divergence contracts.
 
-use bytebudget::ByteCount;
-
-use criticality::trace::{ExactReplay, ReplayFailure, ReplayPosition, Trace, TraceLimits};
+use criticality::{
+    ByteCount,
+    trace::{ExactReplay, ReplayFailure, ReplayPosition, Trace, TraceLimits},
+};
 
 #[test]
 fn exact_equality_advances_one_record_at_a_time() {

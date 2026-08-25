@@ -1,8 +1,6 @@
 //! Observable bounded timeline state.
 
-use bytebudget::ByteCount;
-
-use crate::time::Moment;
+use crate::{ByteCount, time::Moment};
 
 use super::{TimelineId, TimelineLimits};
 

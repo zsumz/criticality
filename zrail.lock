@@ -36,7 +36,7 @@ sha256 = "278374ff43731777bc63b5d4945a6cafa620f8dc246761dff757d2a0905cf29d"
 [[gate]]
 name = "check"
 path = "zcheck.toml"
-sha256 = "37a35d353f5603f56bc1640d3898f4f324b28f53197aa9e59d25e7cf8b20edf6"
+sha256 = "35a7c22028bc0689bc58880cd19fb6317a0f7dae0b09a7362657f7d798a22f87"
 
 [[gate.input]]
 path = ".gitattributes"
@@ -56,7 +56,7 @@ sha256 = "e7bd5ea40d8c76de716c99050228905992152a4e766c6577d43b375229117dd8"
 
 [[gate.input]]
 path = "README.md"
-sha256 = "2245bcb3283f19e5753caef3a91137d7a441f7359440f1839a37356cfc4687df"
+sha256 = "ac0a5bf50a72a259569bf855b8641cb53d21dc4c2fe6a11e865e9ca8015b3167"
 
 [[gate.input]]
 path = "clippy.toml"
@@ -80,7 +80,7 @@ sha256 = "07c347dc7273b4ae0aa3e8451b99059ea8f6ad839e62adc33a273f23d152fa61"
 
 [[gate.input]]
 path = "scripts/package-check"
-sha256 = "9c4699232aad66464ff6b17ffabebf8c4c2c393a4c55a8b6b36288a782e350e4"
+sha256 = "42e011dc6423d3f7e75de7bd6a99ccd499356d2e018da4c42aa9a9e5c6c15471"
 
 [[gate.input]]
 path = "scripts/structure-check"
@@ -88,7 +88,7 @@ sha256 = "f6a21055dd179bd432256382d5870bd9f14700e9d744f0602da0b2c4242b9885"
 
 [[gate.input]]
 path = "src/lib.rs"
-sha256 = "a2b150d0fc4b9d94d37e8df5d9fcdc29d07fdc7a26a763192a2a0da1a04171c4"
+sha256 = "2a6c1c2a96fa17133482a8fb2dc42be67c52ce9a485775066d0803b0124725a4"
 
 [[gate]]
 name = "ci"

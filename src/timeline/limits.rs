@@ -1,6 +1,6 @@
 //! Hard ownership limits for an event timeline.
 
-use bytebudget::ByteCount;
+use crate::ByteCount;
 
 /// Count and variable retained-memory limits for one timeline.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

@@ -1,6 +1,6 @@
 //! Public retained-memory accounting boundary tests.
 
-use bytebudget::{ByteCount, Retained};
+use criticality::{ByteCount, Retained};
 
 const CONST_RETAINED: ByteCount = ByteCount::new(7);
 const CONST_TOTAL: Option<ByteCount> = CONST_RETAINED.checked_add(ByteCount::new(5));

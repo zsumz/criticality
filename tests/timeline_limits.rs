@@ -1,8 +1,7 @@
 //! Public timeline admission and ownership contracts.
 
-use bytebudget::{ByteCount, Retained};
-
 use criticality::{
+    ByteCount, Retained,
     time::{Moment, Span},
     timeline::{ScheduleFailure, Timeline, TimelineId, TimelineLimits},
 };

@@ -26,7 +26,7 @@
 
 ## Model
 
-Criticality is a `no_std + alloc` library built on bytebudget's dependency-free
+Criticality is a `no_std + alloc` library built on exact, dependency-free
 byte-accounting primitives. It gives a state machine deterministic mechanisms
 while leaving domain events, transitions, effects, scheduling policy, fairness,
 and failure policy with the consumer.
@@ -41,8 +41,8 @@ transitions, and every replay divergence identifies the first unmatched position
 ### Time and retention
 
 `Moment`, `Span`, `Deadline`, and `VirtualClock` define a fixed-width virtual
-time domain. bytebudget's `ByteCount` and `Retained` make variable memory part
-of admission instead of an implicit property of a container.
+time domain. `ByteCount` and `Retained` make variable memory part of admission
+instead of an implicit property of a container.
 
 Charge-bearing owners deliberately do not implement `Clone`: a cloned value is
 a new admission whose retained storage must be measured independently.
@@ -76,7 +76,8 @@ scenario's decisions.
 reports the first divergence, exhaustion, and remaining records. A trace can
 lend its already-bounded records directly to replay without duplicating them.
 
-`Trace` stores its live aggregate in bytebudget's non-cloneable `ByteBudget`.
+`Trace` keeps exact live retained-byte accounting without exposing its
+accounting machinery.
 
 ### Consumer evidence
 
@@ -91,19 +92,14 @@ batch policy before repeated consumers demonstrate the same requirement.
 
 ```toml
 [dependencies]
-bytebudget = { version = "=0.0.1-rc.1", default-features = false }
 criticality = "=0.0.1-rc.3"
 ```
-
-Criticality uses bytebudget's types directly in its public signatures, so
-consumers name the same exact bytebudget release instead of depending on a
-Criticality compatibility alias.
 
 Schedule an event with explicit limits and virtual time:
 
 ```rust
-use bytebudget::ByteCount;
 use criticality::{
+    ByteCount,
     time::Moment,
     timeline::{Timeline, TimelineId, TimelineLimits},
 };

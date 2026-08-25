@@ -10,6 +10,8 @@
 
 extern crate alloc;
 
+pub use bytebudget::{ByteCount, Retained};
+
 pub mod entropy;
 pub mod plan;
 pub mod script;

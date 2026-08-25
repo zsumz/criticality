@@ -1,15 +1,71 @@
 #!/usr/bin/env bash
-# Build the crate archive and compare its contents with the reviewed allowlist.
+# Build the crate archive, compare its contents with the reviewed allowlist, and
+# compile a fresh consumer through the public facade.
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-actual="$(mktemp "${TMPDIR:-/tmp}/criticality-package.XXXXXX")"
-trap 'rm -f "$actual"' EXIT
+work="$(mktemp -d "${TMPDIR:-/tmp}/criticality-package.XXXXXX")"
+actual="$work/package-contents.txt"
+package_target="$work/package-target"
+consumer="$work/consumer"
+trap 'rm -rf "$work"' EXIT
 
-cargo package --manifest-path "$repo_root/Cargo.toml" --frozen --allow-dirty
+cargo package \
+    --manifest-path "$repo_root/Cargo.toml" \
+    --frozen \
+    --allow-dirty \
+    --target-dir "$package_target"
 cargo package --manifest-path "$repo_root/Cargo.toml" --list --frozen --allow-dirty \
     | LC_ALL=C sort > "$actual"
 LC_ALL=C sort -c "$repo_root/package-contents.txt"
 diff -u "$repo_root/package-contents.txt" "$actual"
 
-echo "package contents match the reviewed allowlist"
+package_directories=("$package_target"/package/criticality-*/)
+if (( ${#package_directories[@]} != 1 )) || [[ ! -d "${package_directories[0]}" ]]; then
+    echo "error: expected exactly one extracted criticality package" >&2
+    exit 1
+fi
+package_directory="${package_directories[0]%/}"
+
+mkdir -p "$consumer/src"
+cat > "$consumer/Cargo.toml" <<EOF
+[package]
+name = "criticality-package-consumer"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+criticality = { path = "$package_directory" }
+EOF
+cat > "$consumer/src/lib.rs" <<'EOF'
+#![no_std]
+
+use criticality::{
+    ByteCount, Retained,
+    timeline::{Timeline, TimelineId, TimelineLimits},
+};
+
+struct Event;
+
+impl Retained for Event {
+    fn retained_bytes(&self) -> ByteCount {
+        ByteCount::ZERO
+    }
+}
+
+pub fn facade_is_complete() {
+    let timeline = Timeline::<Event>::new(
+        TimelineId::new(1),
+        TimelineLimits::new(1, ByteCount::ZERO),
+    );
+    assert!(timeline.is_empty());
+}
+EOF
+
+cargo check \
+    --manifest-path "$consumer/Cargo.toml" \
+    --offline \
+    --target-dir "$work/consumer-target"
+
+echo "package contents and criticality-only consumer match the reviewed boundary"

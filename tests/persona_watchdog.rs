@@ -1,8 +1,7 @@
 //! Watchdog consumer composition with heartbeat-owned deadline policy.
 
-use bytebudget::{ByteCount, Retained};
-
 use criticality::{
+    ByteCount, Retained,
     time::{Deadline, Moment},
     timeline::{EventToken, Timeline, TimelineId, TimelineLimits},
     trace::{Trace, TraceLimits},

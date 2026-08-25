@@ -1,8 +1,9 @@
 //! Public trace admission, accounting, and ownership contracts.
 
-use bytebudget::{ByteCount, Retained};
-
-use criticality::trace::{Trace, TraceFailure, TraceLimits};
+use criticality::{
+    ByteCount, Retained,
+    trace::{Trace, TraceFailure, TraceLimits},
+};
 
 #[derive(Clone, Copy, Debug)]
 struct Record {

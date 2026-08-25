@@ -1,9 +1,11 @@
 //! Count- and byte-bounded deterministic event ownership.
 
 use alloc::collections::BTreeMap;
-use bytebudget::{ByteCount, Retained};
 
-use crate::time::{Moment, VirtualClock};
+use crate::{
+    ByteCount, Retained,
+    time::{Moment, VirtualClock},
+};
 
 use super::{Delivery, EventId, EventToken, TimelineId, TimelineLimits, TimelineSnapshot};
 

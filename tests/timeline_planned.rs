@@ -1,8 +1,7 @@
 //! Public planned-outcome timeline integration contracts.
 
-use bytebudget::{ByteCount, Retained};
-
 use criticality::{
+    ByteCount, Retained,
     plan::Planned,
     time::{Moment, Span},
     timeline::{Timeline, TimelineId, TimelineLimits},

@@ -82,9 +82,9 @@ description = "Validate deterministic library behavior."
 needs = ["test"]
 
 [tasks.package]
-description = "Build and verify the exact publishable crate archive."
+description = "Verify the crate archive and a consumer that installs only Criticality."
 run = ["scripts/package-check"]
-tools = ["bash", "cargo", "diff", "dirname", "mktemp", "rm", "sort"]
+tools = ["bash", "cargo", "cat", "diff", "dirname", "mkdir", "mktemp", "rm", "sort"]
 resources = ["cargo-target"]
 inputs = ["scripts/package-check", "package-contents.txt", "Cargo.toml", "Cargo.lock", "README.md"]
 
